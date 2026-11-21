@@ -3,6 +3,7 @@ extends Node3D
 ## Modelos 3D (assets/models) e texturas (assets/textures) vem dos arquivos enviados; sons e itens simples sao gerados por codigo.
 
 const SR := 22050
+const TYPE_CPS := 32.0                       # velocidade da digitação das legendas (letras por segundo)
 const QUALIDADE_ALTA := true                   # true = PC bom (sombras e imagem mais nítida); false = notebook fraco
 const RESOLUCAO := 432.0                      # linhas da imagem, estilo VHS/Fears to Fathom (240 = bem pixelado, 360 = mais nítido, 1080 = sem efeito)
 const MACIO := 0.6                            # quanto a imagem fica borrada/macia na horizontal (0.0 a 1.0)
@@ -1282,11 +1283,15 @@ func _pause() -> void:
 
 
 func say(txt: String, secs: float = 5.0) -> void:
+	# a legenda aparece letra por letra, como se alguém estivesse digitando
 	l_sub.text = txt
 	l_sub.modulate.a = 1.0
+	l_sub.visible_characters = 0
 	if sub_tween:
 		sub_tween.kill()
+	var tdur := float(txt.length()) / TYPE_CPS
 	sub_tween = create_tween()
+	sub_tween.tween_property(l_sub, "visible_characters", txt.length(), tdur)
 	sub_tween.tween_interval(secs)
 	sub_tween.tween_property(l_sub, "modulate:a", 0.0, 0.5)
 

@@ -125,3 +125,5 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 - Removido o quadrado azul (tela antiga) da janela da recepcao. Radio 1,8x maior.
 --- VERSAO 35 ---
 - Compressor de ar embaixo do quadro de avisos (quadro movido para x=0,6). Botao do portao trocado pelo button_key.
+--- VERSAO 36 ---
+- Legendas aparecem digitando (TYPE_CPS no topo do main.gd controla a velocidade).
