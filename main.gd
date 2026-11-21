@@ -37,7 +37,7 @@ const WIN_Y0 := 1.2                            # parte de baixo das janelas
 const WIN_Y1 := 2.5                            # parte de cima das janelas
 const WIN_HALF := 1.2                          # metade da largura das janelas
 const FOREST_POS := Vector3(0.0, -0.5, -25.5)  # onde fica a floresta (atrás do fundo da oficina)
-const LARRY_SPOTS := [Vector3(5.0, 0.3, -8.66), Vector3(-5.0, 0.3, -8.66)]   # só a cabeça aparece na janela
+const LARRY_SPOTS := [Vector3(5.0, -0.6, -8.66), Vector3(-5.0, -0.6, -8.66)]   # só a cabeça aparece na janela
 const LARRY_FIRST := 25.0                      # segundos até a primeira aparição
 
 var player: CharacterBody3D
@@ -217,7 +217,8 @@ func mat(kind: String, tint: Color = Color.WHITE, size: float = 4.0, rough: floa
 	m.uv1_scale = Vector3(sc, sc, sc)
 	var key: String = TEXFILE.get(kind, kind)
 	if kind == "wall":
-		m.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST_WITH_MIPMAPS   # visual PSX
+		m.uv1_scale = Vector3(1.0 / 7.2, 1.0 / 4.0, 1.0 / 7.2)   # painel de reboco: 7,2 m de largura x 4 m de altura
+		m.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
 	var exts := [".jpg", ".jpeg", ".png"]
 	var col := _find_asset(TEX_DIR, key + "_color", exts)
 	if col != "":
@@ -720,7 +721,7 @@ func _build_world() -> void:
 	var conc := mat("conc", Color(0.92, 0.92, 0.95), 5.0, 0.8)
 	var concb := mat("conc", Color(1.0, 0.90, 0.78), 5.0, 0.8)
 	var planks := mat("planks", Color(0.95, 0.92, 0.88), 5.0, 0.8)
-	var wall := mat("wall", Color(0.62, 0.58, 0.58), 1.5)
+	var wall := mat("wall", Color(0.66, 0.62, 0.60), 4.0)
 	var wood := mat("wood", Color.WHITE, 1.5)
 	var woodd := mat("woodd", Color.WHITE, 1.5)
 	var crate := mat("crate", Color.WHITE, 1.0)
@@ -1032,6 +1033,7 @@ func _build_world() -> void:
 	larry = _baked("larry")
 	if larry != null:
 		larry.visible = false
+		larry.scale = Vector3.ONE * 1.25
 		add_child(larry)
 		_set_layers(larry, 3)
 	larry_next = LARRY_FIRST
@@ -1449,7 +1451,6 @@ func _build_steps() -> void:
 	steps = [
 		{"o": "Feche o portão principal (botão na parede, perto do portão)", "at": Vector2(4.5, 7.7), "r": 2.2, "h": "[E] Fechar portão", "hold": 0.0, "go": _s0},
 		{"o": "Leia a ordem de serviço na prancheta (bancada)", "at": Vector2(-6.3, -7.2), "r": 1.7, "h": "[E] Ler prancheta", "hold": 0.0, "go": _s1},
-		{"o": "Pegue o filtro de óleo na prateleira do depósito", "at": Vector2(-11.3, 2.8), "r": 1.8, "h": "[E] Pegar filtro de óleo", "hold": 0.0, "go": _p2},
 		{"o": "Pegue o calibrador de pneus na caixa de ferramentas (fundo da garagem)", "at": Vector2(5.2, -7.0), "r": 1.9, "h": "[E] Pegar calibrador", "hold": 0.0, "go": _p3},
 		{"o": "Abra o capô do carro", "at": CAR_FRONT, "r": 1.9, "lift": true, "h": "[E] Abrir capô", "hold": 0.0, "go": _s2},
 		{"o": "Pegue o funil e o galão de óleo no estoque (depósito, porta à esquerda da garagem)", "at": Vector2(-11.3, -2.8), "r": 1.8, "h": "[E] Pegar funil e galão", "hold": 0.0, "go": _s3},
@@ -1474,12 +1475,7 @@ func _s0() -> void:
 
 
 func _s1() -> void:
-	say("Ordem de serviço, Cadillac Eldorado: 1) Trocar o óleo (e o filtro)   2) Verificar a bateria   3) Calibrar os pneus   4) Ronda: checar as travas das janelas", 9.0)
-
-
-func _p2() -> void:
-	sfx(snd_clack, -8.0)
-	say("Filtro de óleo separado.", 2.5)
+	say("Ordem de serviço, Cadillac Eldorado: 1) Trocar o óleo   2) Verificar a bateria   3) Calibrar os pneus   4) Ronda: checar as travas das janelas", 9.0)
 
 
 func _p3() -> void:

@@ -114,3 +114,7 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 - Quinas internas retas; so os batentes das portas (hall <-> salas) arredondados.
 --- VERSAO 31 ---
 - Removida a missao de ler as etiquetas do oleo.
+--- VERSAO 32 ---
+- Parede nova: distressed_painted_wall (reboco descascado, painel de 7,2 m espelhado). Tijolo guardado em assets/textures/parede_tijolo_reserva.jpg.
+- Removida a missao do filtro de oleo.
+- Larry: modelo cortado abaixo do queixo, so a cabeca aparece no vidro.

@@ -26,3 +26,4 @@ Licenca Sketchfab Standard:
 
 british_red_brick_wall_5_meter_section - textura de parede (autor conforme pagina do Sketchfab)
 red_bricks_wall__tile_texture - textura de parede (autor conforme pagina do Sketchfab)
+distressed_painted_wall_6.4m_section - textura de parede (autor conforme pagina do Sketchfab)
