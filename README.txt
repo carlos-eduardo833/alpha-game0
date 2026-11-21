@@ -121,3 +121,5 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 --- VERSAO 33 ---
 - Bancada movida para x=-1.9 (libera a janela esquerda do fundo); prancheta e multimetro acompanham.
 - Larry mais a direita e mais perto do vidro. Multimetro 1,8x maior. Folha borrada sobre a prancheta.
+--- VERSAO 34 ---
+- Removido o quadrado azul (tela antiga) da janela da recepcao. Radio 1,8x maior.

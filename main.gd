@@ -957,13 +957,13 @@ func _build_world() -> void:
 
 	# recepção (direita)
 	_table(Vector3(10.2, 0.0, -3.1), Vector3(3.2, 0.9, 1.4))
-	box(Vector3(9.4, 1.3, -3.65), Vector3(0.7, 0.45, 0.05), lit(Color(0.2, 0.33, 0.5)), false)
 	box(Vector3(10.4, 0.96, -3.1), Vector3(0.3, 0.12, 0.25), flat(Color(0.07, 0.07, 0.07)), false)
 	box(Vector3(11.4, 0.92, -3.1), Vector3(0.3, 0.02, 0.22), flat(Color(0.85, 0.85, 0.85)), false)
 	var rad := _baked("radio")
 	if rad != null:
 		rad.position = Vector3(9.5, 0.9, -3.2)
 		rad.rotation_degrees.y = 12.0
+		rad.scale = Vector3.ONE * 1.8
 		add_child(rad)
 	else:
 		rbox(Vector3(9.5, 1.04, -3.2), Vector3(0.5, 0.28, 0.2), flat(Color(0.25, 0.16, 0.1)), 0.35, 0.35, false)
