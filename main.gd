@@ -37,7 +37,7 @@ const WIN_Y0 := 1.2                            # parte de baixo das janelas
 const WIN_Y1 := 2.5                            # parte de cima das janelas
 const WIN_HALF := 1.2                          # metade da largura das janelas
 const FOREST_POS := Vector3(0.0, -0.5, -25.5)  # onde fica a floresta (atrás do fundo da oficina)
-const LARRY_SPOTS := [Vector3(5.0, -0.6, -8.66), Vector3(-5.0, -0.6, -8.66)]   # só a cabeça aparece na janela
+const LARRY_SPOTS := [Vector3(5.3, -0.6, -8.55), Vector3(-4.7, -0.6, -8.55)]   # só a cabeça aparece na janela
 const LARRY_FIRST := 25.0                      # segundos até a primeira aparição
 
 var player: CharacterBody3D
@@ -859,16 +859,44 @@ func _build_world() -> void:
 			solid_box(LIFT2_BASE + Vector3(sx * 1.32, 1.25, 0.0), Vector3(0.5, 2.5, 0.5))
 
 	# garagem: bancada, armários, pneus, caixas, quadro, estantes
-	_table(Vector3(-5.0, 0.0, -7.8), Vector3(3.0, 0.9, 1.2))
+	_table(Vector3(-1.9, 0.0, -7.8), Vector3(3.0, 0.9, 1.2))
 	clip = _baked("prancheta")
 	if clip != null:
-		clip.position = Vector3(-6.3, 0.9, -7.8)
+		clip.position = Vector3(-3.2, 0.9, -7.8)
 		clip.rotation_degrees.y = 20.0
 		add_child(clip)
 	else:
-		clip = box(Vector3(-6.3, 0.93, -7.8), Vector3(0.35, 0.03, 0.25), flat(Color(0.85, 0.85, 0.78)), false)
+		clip = box(Vector3(-3.2, 0.93, -7.8), Vector3(0.35, 0.03, 0.25), flat(Color(0.85, 0.85, 0.78)), false)
+	# folha de papel com escrita borrada em cima da prancheta
+	var img := Image.create(24, 32, false, Image.FORMAT_RGBA8)
+	img.fill(Color(0.88, 0.86, 0.78))
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 42
+	for row in range(3, 30, 3):
+		var x := 3
+		var maxx := 20 - (6 if row > 24 else 0)
+		while x < maxx:
+			var seg := rng.randi_range(2, 6)
+			for xx in range(x, mini(x + seg, maxx)):
+				img.set_pixel(xx, row, Color(0.18, 0.18, 0.22))
+				if row == 3:
+					img.set_pixel(xx, row + 1, Color(0.18, 0.18, 0.22))
+			x += seg + 1
+	var sheet_mat := StandardMaterial3D.new()
+	sheet_mat.albedo_texture = ImageTexture.create_from_image(img)
+	sheet_mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR
+	sheet_mat.roughness = 1.0
+	var sheet := MeshInstance3D.new()
+	var sm := BoxMesh.new()
+	sm.size = Vector3(0.17, 0.004, 0.25)
+	sheet.mesh = sm
+	sheet.material_override = sheet_mat
+	sheet.position = Vector3(-3.2, 0.9 + 0.046, -7.8)
+	sheet.rotation_degrees.y = 20.0
+	add_child(sheet)
 	multi = _make_prop("multi")
-	multi.position = Vector3(-4.7, 0.9, -7.8)
+	multi.position = Vector3(-1.0, 0.9, -7.8)
+	multi.scale = Vector3.ONE * 1.8
 	add_child(multi)
 	box(Vector3(-5.3, 0.95, -7.9), Vector3(0.4, 0.1, 0.15), flat(Color(0.6, 0.12, 0.12)), false)
 	for cz in [5.05, 6.7]:
@@ -1450,12 +1478,12 @@ func _build_audio() -> void:
 func _build_steps() -> void:
 	steps = [
 		{"o": "Feche o portão principal (botão na parede, perto do portão)", "at": Vector2(4.5, 7.7), "r": 2.2, "h": "[E] Fechar portão", "hold": 0.0, "go": _s0},
-		{"o": "Leia a ordem de serviço na prancheta (bancada)", "at": Vector2(-6.3, -7.2), "r": 1.7, "h": "[E] Ler prancheta", "hold": 0.0, "go": _s1},
+		{"o": "Leia a ordem de serviço na prancheta (bancada)", "at": Vector2(-3.2, -7.2), "r": 1.7, "h": "[E] Ler prancheta", "hold": 0.0, "go": _s1},
 		{"o": "Pegue o calibrador de pneus na caixa de ferramentas (fundo da garagem)", "at": Vector2(5.2, -7.0), "r": 1.9, "h": "[E] Pegar calibrador", "hold": 0.0, "go": _p3},
 		{"o": "Abra o capô do carro", "at": CAR_FRONT, "r": 1.9, "lift": true, "h": "[E] Abrir capô", "hold": 0.0, "go": _s2},
 		{"o": "Pegue o funil e o galão de óleo no estoque (depósito, porta à esquerda da garagem)", "at": Vector2(-11.3, -2.8), "r": 1.8, "h": "[E] Pegar funil e galão", "hold": 0.0, "go": _s3},
 		{"o": "Troque o óleo (segure E no carro)", "at": CAR_FRONT, "r": 1.9, "lift": true, "h": "Segure [E] para trocar o óleo", "hold": 4.0, "go": _s4},
-		{"o": "Pegue o multímetro na bancada", "at": Vector2(-4.7, -7.2), "r": 1.7, "h": "[E] Pegar multímetro", "hold": 0.0, "go": _s5},
+		{"o": "Pegue o multímetro na bancada", "at": Vector2(-1.0, -7.2), "r": 1.7, "h": "[E] Pegar multímetro", "hold": 0.0, "go": _s5},
 		{"o": "Teste a bateria do carro com o multímetro", "at": CAR_FRONT, "r": 1.9, "lift": true, "h": "[E] Testar bateria", "hold": 0.0, "go": _s6},
 		{"o": "Vá ao depósito (porta à esquerda da garagem) e pegue a bateria nova", "at": Vector2(-11.3, 0.0), "r": 2.3, "h": "[E] Pegar bateria nova", "hold": 0.0, "go": _s7},
 		{"o": "Troque a bateria do carro (segure E)", "at": CAR_FRONT, "r": 1.9, "lift": true, "h": "Segure [E] para instalar a bateria", "hold": 4.0, "go": _s8},

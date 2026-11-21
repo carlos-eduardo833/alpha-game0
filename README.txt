@@ -118,3 +118,6 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 - Parede nova: distressed_painted_wall (reboco descascado, painel de 7,2 m espelhado). Tijolo guardado em assets/textures/parede_tijolo_reserva.jpg.
 - Removida a missao do filtro de oleo.
 - Larry: modelo cortado abaixo do queixo, so a cabeca aparece no vidro.
+--- VERSAO 33 ---
+- Bancada movida para x=-1.9 (libera a janela esquerda do fundo); prancheta e multimetro acompanham.
+- Larry mais a direita e mais perto do vidro. Multimetro 1,8x maior. Folha borrada sobre a prancheta.
