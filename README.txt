@@ -123,3 +123,5 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 - Larry mais a direita e mais perto do vidro. Multimetro 1,8x maior. Folha borrada sobre a prancheta.
 --- VERSAO 34 ---
 - Removido o quadrado azul (tela antiga) da janela da recepcao. Radio 1,8x maior.
+--- VERSAO 35 ---
+- Compressor de ar embaixo do quadro de avisos (quadro movido para x=0,6). Botao do portao trocado pelo button_key.

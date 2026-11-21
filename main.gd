@@ -791,8 +791,13 @@ func _build_world() -> void:
 	gate = box(Vector3(0, 5.9, 8.35), Vector3(6, 3.2, 0.12), rust, false)
 	for i in 8:
 		box(Vector3(0, -1.5 + i * 0.4, 0), Vector3(6, 0.04, 0.14), flat(Color(0.2, 0.2, 0.22)), false, gate)
-	box(Vector3(4.5, 1.3, 8.38), Vector3(0.5, 0.5, 0.05), flat(Color(0.1, 0.1, 0.1)), false)
-	box(Vector3(4.5, 1.3, 8.32), Vector3(0.25, 0.25, 0.08), lit(Color(0.8, 0.12, 0.1)), false)
+	var btn := _baked("botao")
+	if btn != null:
+		btn.position = Vector3(4.5, 1.23, 8.36)
+		add_child(btn)
+	else:
+		box(Vector3(4.5, 1.3, 8.38), Vector3(0.5, 0.5, 0.05), flat(Color(0.1, 0.1, 0.1)), false)
+		box(Vector3(4.5, 1.3, 8.32), Vector3(0.25, 0.25, 0.08), lit(Color(0.8, 0.12, 0.1)), false)
 
 	# ---- Cadillac Eldorado (sobre o elevador animado). O capô ainda não abre.
 	car_root = Node3D.new()
@@ -927,7 +932,7 @@ func _build_world() -> void:
 		solid_box(tp + Vector3(0, 0.35, 0), Vector3(0.75, 0.7, 0.75))
 	box(Vector3(-5.0, 0.4, 7.9), Vector3(0.8, 0.8, 0.8), crate)
 	box(Vector3(-4.1, 0.4, 7.9), Vector3(0.8, 0.8, 0.8), crate)
-	var board := box(Vector3(0, 2.2, -8.38), Vector3(2.2, 1.3, 0.04), flat(Color(0.7, 0.68, 0.58)), false)
+	var board := box(Vector3(0.6, 2.2, -8.38), Vector3(2.2, 1.3, 0.04), flat(Color(0.7, 0.68, 0.58)), false)
 	var lb := Label3D.new()
 	lb.text = "REGRAS DA OFICINA\n\nProibido abandonar a\noficina durante o\nturno solo."
 	lb.font_size = 40
@@ -935,6 +940,13 @@ func _build_world() -> void:
 	lb.modulate = Color(0.1, 0.1, 0.1)
 	lb.position = Vector3(0, 0, 0.03)
 	board.add_child(lb)
+
+	# compressor de ar embaixo do quadro de avisos
+	var comp := _baked("compressor")
+	if comp != null:
+		comp.position = Vector3(0.6, 0.0, -8.14)
+		add_child(comp)
+		solid_box(Vector3(0.6, 0.56, -8.14), Vector3(1.6, 1.12, 0.5))
 
 	# caixa de ferramentas (guarda as chaves), encostada na parede dos fundos
 	var chest := _baked("caixa_ferramentas")
@@ -1799,7 +1811,7 @@ func _physics_process(delta: float) -> void:
 	else:
 		prog = 0.0
 		bar.visible = false
-		if not over and _near(Vector2(0, -7.4), 2.0):
+		if not over and _near(Vector2(0.6, -7.4), 2.0):
 			h = "[E] Ler quadro"
 			if press_e:
 				say("Quadro: Proibido abandonar a oficina durante o turno solo.", 5.0)
