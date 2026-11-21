@@ -1,0 +1,28 @@
+CREDITOS (modelos e texturas do Sketchfab). Se publicar o jogo, mantenha estes creditos.
+Licenca CC-BY 4.0 (exige credito ao autor):
+ - Tire Stack - TymonG
+ - Car lift - eaglefromfuture
+ - covered car - Arrangemonk
+ - Old Sofa - glezova
+ - a forest (3) with a road at night for game - dasy444
+ - PSX Base - Larry - MrPrisma3D
+Licenca Sketchfab Standard:
+ - Fiat Uno 1998, PSX Closet, PSX Passat LS 1978, PSX Wooden Table - Charckes
+ - Car Battery - Digital.Dream.Realm
+ - Radio final - darlice2017
+ - Clipboard e Retro Multimeter - Console Art Cybernetic
+ - Metal Tool Chest - Prince Obrymec
+ - old factory FREE (so o chao) - dasy444
+ - Two Post vehicle lift - Jengrac education foundation
+ - 654230030_3-tier_shelf_model - 654230030
+ - Ceiling light - Sousinho
+ - psx - cabinet - Kasugay
+ - Cadillac Eldorado - amirbuilds2000
+ - Simple Tire - Luka Feric
+ - Simple fluorescent tube light - trashbinkr
+ - Motor oil canister - pepe
+ - Wood Panels seamless PBR (textura do teto) - Material-Magus
+ - PSX Style Brick Wall (textura das paredes) - valse kamerplant
+
+british_red_brick_wall_5_meter_section - textura de parede (autor conforme pagina do Sketchfab)
+red_bricks_wall__tile_texture - textura de parede (autor conforme pagina do Sketchfab)

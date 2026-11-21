@@ -1,0 +1,7 @@
+PASTA assets
+ models/  -> modelos 3D (.glb) ja prontos: cadillac, elevador_animado, elevador_parado, carro_coberto,
+             radio, bateria, caixa_ferramentas, pneu, lata, tubo, armario, mesa, sofa, estante, luminaria,
+             larry, floresta, prancheta, multimetro
+ textures/-> piso_color.jpg (chao da oficina inteira), parede_color.jpg (tijolos PSX)
+Se algum arquivo faltar, o jogo usa uma versao simples gerada por codigo.
+Na PRIMEIRA vez que abrir no Godot, ele "importa" os arquivos: pode demorar alguns minutos.
