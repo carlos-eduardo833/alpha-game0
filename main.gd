@@ -874,32 +874,32 @@ func _build_world() -> void:
 	else:
 		clip = box(Vector3(-3.2, 0.93, -7.8), Vector3(0.35, 0.03, 0.25), flat(Color(0.85, 0.85, 0.78)), false)
 	# folha de papel com escrita borrada em cima da prancheta
-	var img := Image.create(24, 32, false, Image.FORMAT_RGBA8)
-	img.fill(Color(0.88, 0.86, 0.78))
-	var rng := RandomNumberGenerator.new()
-	rng.seed = 42
-	for row in range(3, 30, 3):
-		var x := 3
-		var maxx := 20 - (6 if row > 24 else 0)
-		while x < maxx:
-			var seg := rng.randi_range(2, 6)
-			for xx in range(x, mini(x + seg, maxx)):
-				img.set_pixel(xx, row, Color(0.18, 0.18, 0.22))
-				if row == 3:
-					img.set_pixel(xx, row + 1, Color(0.18, 0.18, 0.22))
-			x += seg + 1
-	var sheet_mat := StandardMaterial3D.new()
-	sheet_mat.albedo_texture = ImageTexture.create_from_image(img)
-	sheet_mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR
-	sheet_mat.roughness = 1.0
-	var sheet := MeshInstance3D.new()
-	var sm := BoxMesh.new()
-	sm.size = Vector3(0.17, 0.004, 0.25)
-	sheet.mesh = sm
-	sheet.material_override = sheet_mat
-	sheet.position = Vector3(-3.2, 0.9 + 0.046, -7.8)
-	sheet.rotation_degrees.y = 20.0
-	add_child(sheet)
+	var pp_img := Image.create(24, 32, false, Image.FORMAT_RGBA8)
+	pp_img.fill(Color(0.88, 0.86, 0.78))
+	var pp_rng := RandomNumberGenerator.new()
+	pp_rng.seed = 42
+	for pp_row in range(3, 30, 3):
+		var pp_x := 3
+		var pp_maxx := 20 - (6 if pp_row > 24 else 0)
+		while pp_x < pp_maxx:
+			var pp_seg := pp_rng.randi_range(2, 6)
+			for xx in range(pp_x, mini(pp_x + pp_seg, pp_maxx)):
+				pp_img.set_pixel(xx, pp_row, Color(0.18, 0.18, 0.22))
+				if pp_row == 3:
+					pp_img.set_pixel(xx, pp_row + 1, Color(0.18, 0.18, 0.22))
+			pp_x += pp_seg + 1
+	var pp_mat := StandardMaterial3D.new()
+	pp_mat.albedo_texture = ImageTexture.create_from_image(pp_img)
+	pp_mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR
+	pp_mat.roughness = 1.0
+	var pp_sheet := MeshInstance3D.new()
+	var pp_mesh := BoxMesh.new()
+	pp_mesh.size = Vector3(0.17, 0.004, 0.25)
+	pp_sheet.mesh = pp_mesh
+	pp_sheet.material_override = pp_mat
+	pp_sheet.position = Vector3(-3.2, 0.9 + 0.046, -7.8)
+	pp_sheet.rotation_degrees.y = 20.0
+	add_child(pp_sheet)
 	multi = _make_prop("multi")
 	multi.position = Vector3(-1.0, 0.9, -7.8)
 	multi.scale = Vector3.ONE * 1.8

@@ -127,3 +127,5 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 - Compressor de ar embaixo do quadro de avisos (quadro movido para x=0,6). Botao do portao trocado pelo button_key.
 --- VERSAO 36 ---
 - Legendas aparecem digitando (TYPE_CPS no topo do main.gd controla a velocidade).
+--- VERSAO 37 ---
+- Corrigido erro de variavel duplicada (sm) criado pela folha da prancheta.
