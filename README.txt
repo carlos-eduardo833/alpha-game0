@@ -132,3 +132,5 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 --- VERSAO 38 ---
 - Bancada da garagem com proporcao menor (pernas menos esticadas), itens reposicionados.
 - Mesa do radio movida para a parede leste, ao lado do gabinete (libera a janela da recepcao). Removidos objetos antigos (caixa preta e papel).
+--- VERSAO 39 ---
+- Bancada de volta embaixo da janela esquerda dos fundos, com prancheta e multimetro; ronda da janela feita de frente para a bancada.

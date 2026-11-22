@@ -869,14 +869,14 @@ func _build_world() -> void:
 			solid_box(LIFT2_BASE + Vector3(sx * 1.32, 1.25, 0.0), Vector3(0.5, 2.5, 0.5))
 
 	# garagem: bancada, armários, pneus, caixas, quadro, estantes
-	_table(Vector3(-2.2, 0.0, -7.8), Vector3(2.4, 0.9, 1.1))
+	_table(Vector3(-5.0, 0.0, -7.8), Vector3(2.4, 0.9, 1.1))
 	clip = _baked("prancheta")
 	if clip != null:
-		clip.position = Vector3(-2.9, 0.9, -7.8)
+		clip.position = Vector3(-5.7, 0.9, -7.8)
 		clip.rotation_degrees.y = 20.0
 		add_child(clip)
 	else:
-		clip = box(Vector3(-2.9, 0.93, -7.8), Vector3(0.35, 0.03, 0.25), flat(Color(0.85, 0.85, 0.78)), false)
+		clip = box(Vector3(-5.7, 0.93, -7.8), Vector3(0.35, 0.03, 0.25), flat(Color(0.85, 0.85, 0.78)), false)
 	# folha de papel com escrita borrada em cima da prancheta
 	var pp_img := Image.create(24, 32, false, Image.FORMAT_RGBA8)
 	pp_img.fill(Color(0.88, 0.86, 0.78))
@@ -901,11 +901,11 @@ func _build_world() -> void:
 	pp_mesh.size = Vector3(0.17, 0.004, 0.25)
 	pp_sheet.mesh = pp_mesh
 	pp_sheet.material_override = pp_mat
-	pp_sheet.position = Vector3(-2.9, 0.9 + 0.046, -7.8)
+	pp_sheet.position = Vector3(-5.7, 0.9 + 0.046, -7.8)
 	pp_sheet.rotation_degrees.y = 20.0
 	add_child(pp_sheet)
 	multi = _make_prop("multi")
-	multi.position = Vector3(-1.6, 0.9, -7.8)
+	multi.position = Vector3(-4.3, 0.9, -7.8)
 	multi.scale = Vector3.ONE * 1.8
 	add_child(multi)
 	box(Vector3(-5.3, 0.95, -7.9), Vector3(0.4, 0.1, 0.15), flat(Color(0.6, 0.12, 0.12)), false)
@@ -1497,18 +1497,18 @@ func _build_audio() -> void:
 func _build_steps() -> void:
 	steps = [
 		{"o": "Feche o portão principal (botão na parede, perto do portão)", "at": Vector2(4.5, 7.7), "r": 2.2, "h": "[E] Fechar portão", "hold": 0.0, "go": _s0},
-		{"o": "Leia a ordem de serviço na prancheta (bancada)", "at": Vector2(-2.9, -7.2), "r": 1.7, "h": "[E] Ler prancheta", "hold": 0.0, "go": _s1},
+		{"o": "Leia a ordem de serviço na prancheta (bancada)", "at": Vector2(-5.7, -7.0), "r": 1.7, "h": "[E] Ler prancheta", "hold": 0.0, "go": _s1},
 		{"o": "Pegue o calibrador de pneus na caixa de ferramentas (fundo da garagem)", "at": Vector2(5.2, -7.0), "r": 1.9, "h": "[E] Pegar calibrador", "hold": 0.0, "go": _p3},
 		{"o": "Abra o capô do carro", "at": CAR_FRONT, "r": 1.9, "lift": true, "h": "[E] Abrir capô", "hold": 0.0, "go": _s2},
 		{"o": "Pegue o funil e o galão de óleo no estoque (depósito, porta à esquerda da garagem)", "at": Vector2(-11.3, -2.8), "r": 1.8, "h": "[E] Pegar funil e galão", "hold": 0.0, "go": _s3},
 		{"o": "Troque o óleo (segure E no carro)", "at": CAR_FRONT, "r": 1.9, "lift": true, "h": "Segure [E] para trocar o óleo", "hold": 4.0, "go": _s4},
-		{"o": "Pegue o multímetro na bancada", "at": Vector2(-1.6, -7.2), "r": 1.7, "h": "[E] Pegar multímetro", "hold": 0.0, "go": _s5},
+		{"o": "Pegue o multímetro na bancada", "at": Vector2(-4.3, -7.0), "r": 1.7, "h": "[E] Pegar multímetro", "hold": 0.0, "go": _s5},
 		{"o": "Teste a bateria do carro com o multímetro", "at": CAR_FRONT, "r": 1.9, "lift": true, "h": "[E] Testar bateria", "hold": 0.0, "go": _s6},
 		{"o": "Vá ao depósito (porta à esquerda da garagem) e pegue a bateria nova", "at": Vector2(-11.3, 0.0), "r": 2.3, "h": "[E] Pegar bateria nova", "hold": 0.0, "go": _s7},
 		{"o": "Troque a bateria do carro (segure E)", "at": CAR_FRONT, "r": 1.9, "lift": true, "h": "Segure [E] para instalar a bateria", "hold": 4.0, "go": _s8},
 		{"o": "Calibre os pneus: pneu 1 de 4 (agache ao lado da roda, segure E)", "at": TIRE_SPOTS[0], "r": 1.0, "lift": true, "multi": 4, "h": "Segure [E] para calibrar o pneu", "hold": 3.5, "go": _s9},
 		{"o": "Ronda do turno: verifique a janela dos fundos (lado direito)", "at": Vector2(5.0, -7.5), "r": 1.8, "h": "Segure [E] para checar a trava", "hold": 2.0, "go": _p4},
-		{"o": "Ronda do turno: verifique a janela dos fundos (lado esquerdo)", "at": Vector2(-5.0, -7.5), "r": 1.8, "h": "Segure [E] para checar a trava", "hold": 2.0, "go": _p5},
+		{"o": "Ronda do turno: verifique a janela dos fundos (lado esquerdo)", "at": Vector2(-5.0, -6.4), "r": 1.6, "h": "Segure [E] para checar a trava", "hold": 2.0, "go": _p5},
 		{"o": "Ronda do turno: verifique a janela do depósito", "at": Vector2(-10.0, -3.0), "r": 1.8, "h": "Segure [E] para checar a trava", "hold": 2.0, "go": _p6},
 		{"o": "Ronda do turno: verifique a janela da recepção", "at": Vector2(10.0, -3.0), "r": 1.8, "h": "Segure [E] para checar a trava", "hold": 2.0, "go": _p7},
 		{"o": "Feche o capô", "at": CAR_FRONT, "r": 1.9, "lift": true, "h": "[E] Fechar capô", "hold": 0.0, "go": _s10},
