@@ -1171,19 +1171,22 @@ func _build_world() -> void:
 				add_child(fl2)
 				_tint(fl2, Color(0.30, 0.36, 0.52))
 				_set_layers(fl2, 2)
-	# árvores bem perto das janelas do depósito e da recepção (as cópias da mata ficam longe delas)
+	# árvores (pinheiros) bem perto das janelas: depósito, recepção e fundos da garagem
 	var wtrees := Node3D.new()
 	add_child(wtrees)
-	var tr_trunk := flat(Color(0.07, 0.06, 0.06), 0.9)
-	var tr_leaf := flat(Color(0.06, 0.09, 0.09), 0.95)
-	for tpos in [[-12.0, -6.5, 1.0], [-10.2, -8.0, 1.2], [-8.3, -6.8, 0.9], [-11.0, -10.0, 1.3], [-9.0, -9.5, 1.1], [-13.0, -8.5, 1.0],
-			[12.0, -6.5, 1.0], [10.2, -8.0, 1.2], [8.3, -6.8, 0.9], [11.0, -10.0, 1.3], [9.0, -9.5, 1.1], [13.0, -8.5, 1.0]]:
-		var tx: float = tpos[0]
-		var tz: float = tpos[1]
-		var tk: float = tpos[2]
-		cyl(Vector3(tx, 1.6 * tk, tz), 0.16 * tk, 0.24 * tk, 3.2 * tk, tr_trunk, Vector3.ZERO, wtrees)
-		cyl(Vector3(tx, 3.6 * tk, tz), 0.0, 1.3 * tk, 3.0 * tk, tr_leaf, Vector3.ZERO, wtrees)
-		cyl(Vector3(tx, 5.0 * tk, tz), 0.0, 0.9 * tk, 2.2 * tk, tr_leaf, Vector3.ZERO, wtrees)
+	var tree_rng := RandomNumberGenerator.new()
+	tree_rng.seed = 7
+	for tpos in [[-12.0, -6.8, 1.0], [-10.0, -8.6, 1.2], [-9.4, -6.6, 0.9], [-11.2, -10.5, 1.3], [-9.0, -11.0, 1.1], [-13.5, -8.0, 1.0],
+			[12.0, -6.8, 1.0], [10.0, -8.6, 1.2], [9.4, -6.6, 0.9], [11.2, -10.5, 1.3], [9.0, -11.0, 1.1], [13.5, -8.0, 1.0],
+			[-6.5, -11.5, 1.1], [-3.0, -13.0, 1.3], [2.5, -12.0, 1.0], [6.0, -11.5, 1.2]]:
+		var tree := _baked("arvore")
+		if tree == null:
+			break
+		tree.position = Vector3(tpos[0], -0.2, tpos[1])
+		tree.scale = Vector3.ONE * float(tpos[2])
+		tree.rotation_degrees.y = tree_rng.randf_range(0.0, 360.0)
+		wtrees.add_child(tree)
+		_tint(tree, Color(0.42, 0.48, 0.62))   # noite: azulado e escuro
 	_set_layers(wtrees, 2)
 	var moon := DirectionalLight3D.new()
 	moon.light_color = Color(0.55, 0.65, 0.95)

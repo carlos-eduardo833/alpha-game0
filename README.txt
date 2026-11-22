@@ -195,3 +195,5 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 - Caixa de ferramentas (modelo) devolvida a mesa de ferramentas (tinha sido removida por engano na v63).
 --- VERSAO 67 ---
 - Sons reais: capo abrindo/fechando, trava da janela (rondas), elevador subindo/descendo (trechos de 6 s). Sem esses arquivos o jogo volta aos sons gerados por codigo.
+--- VERSAO 68 ---
+- Arvores procedurais trocadas pelo modelo de pinheiro (tree_3d_model_fir_spruce_pine, ~1.600 triangulos cada): 16 pinheiros perto das janelas do deposito, recepcao e fundos.
