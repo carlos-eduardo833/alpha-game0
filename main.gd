@@ -119,7 +119,7 @@ var snd_hiss: AudioStream
 var snd_lift: AudioStream
 var radio_bus := "Master"
 var radio_file := false          # true se o jogador colocou radio.mp3/ogg (aí não há noticiário)
-var radio_pos := Vector3(3.7, 1.0, 7.0)
+var radio_pos := Vector3(2.2, 1.0, 7.0)
 var radio_next := 14.0
 var radio_busy_until := 0.0
 var radio_i := 0
@@ -880,7 +880,8 @@ func _build_world() -> void:
 	box(Vector3(-0.38, 0.69, 1.7), Vector3(0.22, 0.12, 0.2), flat(Color(0.1, 0.1, 0.12), 0.5, 0.5), false, car_root)
 	_add_body_at(car_root, Vector3(0, 0.72, 0.0), Vector3(2.0, 1.44, 5.8))
 	# as baterias do carro ficam guardadas fora de vista (o capô ainda não abre)
-	car_bat = _make_prop("bateria_velha")
+	car_bat = _make_prop("bateria")
+	_tint(car_bat, Color(0.42, 0.38, 0.32))   # bateria velha: o mesmo modelo, escurecido e suja
 	car_bat.position = BAT_SPOT
 	car_bat.scale = Vector3.ONE * 1.4
 	car_root.add_child(car_bat)
@@ -1064,6 +1065,7 @@ func _build_world() -> void:
 	if rifle != null:
 		rifle.position = Vector3(12.88, 1.9, -2.05)
 		rifle.rotation_degrees.y = -90.0
+		rifle.scale = Vector3.ONE * 1.4
 		add_child(rifle)
 	# tomadas (2 por cômodo) e interruptores de luz
 	for sk in [
@@ -1090,16 +1092,16 @@ func _build_world() -> void:
 
 	# recepção (direita)
 	_table(Vector3(12.3, 0.0, -2.05), Vector3(2.4, 0.9, 1.1), 90.0)
-	_table(Vector3(3.7, 0.0, 7.0), Vector3(1.2, 0.9, 0.7))
+	_table(Vector3(2.2, 0.0, 7.0), Vector3(1.2, 0.9, 0.7))
 	var rad := _baked("radio")
 	if rad != null:
-		rad.position = Vector3(3.7, 0.9, 7.0)
+		rad.position = Vector3(2.2, 0.9, 7.0)
 		rad.rotation_degrees.y = 190.0
 		rad.scale = Vector3.ONE * 1.8
 		add_child(rad)
 	else:
-		rbox(Vector3(3.7, 1.04, 7.0), Vector3(0.5, 0.28, 0.2), flat(Color(0.25, 0.16, 0.1)), 0.35, 0.35, false)
-		box(Vector3(3.7, 1.06, 7.0), Vector3(0.14, 0.06, 0.01), lit(Color(0.9, 0.6, 0.2)), false)
+		rbox(Vector3(2.2, 1.04, 7.0), Vector3(0.5, 0.28, 0.2), flat(Color(0.25, 0.16, 0.1)), 0.35, 0.35, false)
+		box(Vector3(2.2, 1.06, 7.0), Vector3(0.14, 0.06, 0.01), lit(Color(0.9, 0.6, 0.2)), false)
 	var sofa := _baked("sofa")
 	if sofa != null:
 		sofa.position = Vector3(10.3, 0.0, 3.2)
@@ -1434,7 +1436,7 @@ func say(txt: String, secs: float = 5.0) -> void:
 
 
 func _render_chk() -> void:
-	var rows := [["oleo", "Óleo trocado"], ["bateria", "Bateria nova"], ["pneus", "Pneus calibrados"], ["capo", "Capô fechado"]]
+	var rows := [["oleo", "Óleo completado"], ["bateria", "Bateria nova"], ["pneus", "Pneus calibrados"], ["capo", "Capô fechado"]]
 	var s := "[right]"
 	for r in rows:
 		if car_state[r[0]]:
@@ -1696,14 +1698,17 @@ func _build_steps() -> void:
 	steps = [
 		{"o": "Feche o portão principal (botão na parede, perto do portão)", "at": Vector2(4.5, 7.7), "r": 2.2, "h": "[E] Fechar portão", "hold": 0.0, "go": _s0},
 		{"o": "Leia a ordem de serviço na prancheta (bancada)", "at": Vector2(-5.7, -7.0), "r": 1.7, "h": "[E] Ler prancheta", "hold": 0.0, "go": _s1},
-		{"o": "Pegue o calibrador de pneus no compressor de ar (fundo da garagem)", "at": Vector2(0.6, -7.2), "r": 1.9, "h": "[E] Pegar calibrador", "hold": 0.0, "go": _p3},
+		{"o": "Suba o carro no elevador para ver embaixo (aponte para o motor do elevador e aperte E)", "cond": func(): return lift_state == 2, "go": _l1},
+		{"o": "Desça o carro (aponte para o motor do elevador e aperte E)", "cond": func(): return lift_state == 0, "go": _l2},
 		{"o": "Abra o capô do carro", "at": CAR_FRONT, "r": 1.9, "lift": true, "h": "[E] Abrir capô", "hold": 0.0, "go": _s2},
+		{"o": "Verifique o nível de óleo (vareta do motor)", "at": CAR_FRONT, "r": 1.9, "lift": true, "h": "[E] Verificar nível de óleo", "hold": 0.0, "go": _o1},
 		{"o": "Pegue o funil e o galão de óleo no estoque (depósito, porta à esquerda da garagem)", "at": Vector2(-11.3, -2.8), "r": 1.8, "h": "[E] Pegar funil e galão", "hold": 0.0, "go": _s3},
-		{"o": "Troque o óleo (segure E no carro)", "at": CAR_FRONT, "r": 1.9, "lift": true, "h": "Segure [E] para trocar o óleo", "hold": 4.0, "go": _s4},
+		{"o": "Complete o óleo (segure E no carro)", "at": CAR_FRONT, "r": 1.9, "lift": true, "h": "Segure [E] para completar o óleo", "hold": 4.0, "go": _s4},
 		{"o": "Pegue o multímetro na bancada", "at": Vector2(-4.7, -7.0), "r": 1.7, "h": "[E] Pegar multímetro", "hold": 0.0, "go": _s5},
 		{"o": "Teste a bateria do carro com o multímetro", "at": CAR_FRONT, "r": 1.9, "lift": true, "h": "[E] Testar bateria", "hold": 0.0, "go": _s6},
 		{"o": "Vá ao depósito (porta à esquerda da garagem) e pegue a bateria nova", "at": Vector2(-11.3, 0.0), "r": 2.3, "h": "[E] Pegar bateria nova", "hold": 0.0, "go": _s7},
 		{"o": "Troque a bateria do carro (segure E)", "at": CAR_FRONT, "r": 1.9, "lift": true, "h": "Segure [E] para instalar a bateria", "hold": 4.0, "go": _s8},
+		{"o": "Pegue o calibrador de pneus no compressor de ar (fundo da garagem)", "at": Vector2(0.6, -7.2), "r": 1.9, "h": "[E] Pegar calibrador", "hold": 0.0, "go": _p3},
 		{"o": "Calibre os pneus: pneu 1 de 4 (agache ao lado da roda, segure E)", "at": TIRE_SPOTS[0], "r": 1.0, "lift": true, "multi": 4, "h": "Segure [E] para calibrar o pneu", "hold": 3.5, "go": _s9},
 		{"o": "Ronda do turno: verifique a janela dos fundos (lado direito)", "at": Vector2(5.0, -7.5), "r": 1.8, "h": "Segure [E] para checar a trava", "hold": 2.0, "go": _p4},
 		{"o": "Ronda do turno: verifique a janela dos fundos (lado esquerdo)", "at": Vector2(-5.0, -6.4), "r": 1.6, "h": "Segure [E] para checar a trava", "hold": 2.0, "go": _p5},
@@ -1721,7 +1726,20 @@ func _s0() -> void:
 
 
 func _s1() -> void:
-	say("Ordem de serviço, Cadillac Eldorado: 1) Trocar o óleo   2) Verificar a bateria   3) Calibrar os pneus   4) Ronda: checar as travas das janelas", 9.0)
+	say("Ordem de serviço, Cadillac Eldorado: 1) Ver embaixo no elevador   2) Completar o óleo   3) Verificar a bateria   4) Calibrar os pneus   5) Ronda: checar as travas das janelas", 10.0)
+
+
+func _l1() -> void:
+	say("Embaixo: sem vazamentos, só o pingo de sempre.", 3.5)
+
+
+func _l2() -> void:
+	say("Carro no chão. Agora o capô.", 2.5)
+
+
+func _o1() -> void:
+	sfx(snd_clack, -8.0, 1.2)
+	say("Vareta: o nível de óleo está bem abaixo do mínimo. Precisa completar.", 4.5)
 
 
 func _p3() -> void:
@@ -1770,7 +1788,7 @@ func _s4() -> void:
 	car_state["oleo"] = true
 	_render_chk()
 	sfx(snd_hiss, -10.0, 0.6)
-	say("Óleo trocado.", 2.5)
+	say("Óleo completado.", 2.5)
 
 
 func _larry_appear() -> void:
@@ -2178,7 +2196,13 @@ func _physics_process(delta: float) -> void:
 	if step < steps.size():
 		s = steps[step]
 	var step_near := false
-	if s != null and _near(s["at"], s["r"]):
+	if s != null and s.has("cond"):
+		prog = 0.0
+		bar.visible = false
+		var cnd: Callable = s["cond"]
+		if not over and cnd.call():
+			_advance()
+	elif s != null and _near(s["at"], s["r"]):
 		step_near = true
 		if s.get("lift", false) and lift_state != 0:
 			h = "Abaixe o carro no elevador para trabalhar nele"

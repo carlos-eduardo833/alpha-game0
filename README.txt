@@ -177,3 +177,6 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 - Multimetro trocado pelo retro_multimeter (texturas melhores), em pe sobre a bancada com os cabos na frente. Veja CREDITOS.txt.
 --- VERSAO 58 ---
 - Floresta mais densa e mais perto da garagem (duas copias extras). Som de curto-circuito tambem ao entrar no deposito e no susto do Larry.
+--- VERSAO 59 ---
+- Nova sequencia: ler ordem > subir o carro (ver embaixo) > descer > abrir capo > verificar nivel de oleo > funil e galao > completar oleo > multimetro (Larry na janela) > testar bateria > bateria nova > trocar > calibrador no compressor > 4 pneus > ronda > fechar capo.
+- Bateria velha agora e o mesmo modelo, escurecido. Radio movido para x=2,2 (longe do interruptor do portao). Espingarda 40% maior.
