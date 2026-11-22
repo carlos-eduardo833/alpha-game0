@@ -164,3 +164,5 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 - Chuva: som real (chuva.ogg, 46 s em loop sem emenda). Veja CREDITOS.txt.
 --- VERSAO 53 ---
 - Passos: 6 passos gravados (footstep.m4a cortado em passo1..6.ogg), sorteados a cada passada.
+--- VERSAO 54 ---
+- Corrida: passos mais rapidos, mais altos e mais agudos (secos), balanco da camera mais rapido.

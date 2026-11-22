@@ -2041,11 +2041,18 @@ func _physics_process(delta: float) -> void:
 	crouch = move_toward(crouch, want_crouch, delta * 3.0)
 	cam.position.y = 1.65 - crouch * 0.85
 	if moving:
-		cam.position.y += sin(t * 7.0) * 0.025
+		var running := sp > 3.0
+		cam.position.y += sin(t * (10.5 if running else 7.0)) * (0.035 if running else 0.025)
 		step_acc += delta * sp
 		if step_acc > 1.7:
 			step_acc = 0.0
-			sfx(_step_snd(), -6.0 if not snd_steps.is_empty() else -14.0, randf_range(0.95, 1.05))
+			if snd_steps.is_empty():
+				sfx(snd_step, -12.0 if running else -14.0, randf_range(0.9, 1.2))
+			elif running:
+				# correndo: passos mais rápidos, mais altos e mais secos
+				sfx(_step_snd(), -1.5, randf_range(1.18, 1.35))
+			else:
+				sfx(_step_snd(), -6.0, randf_range(0.95, 1.05))
 
 	# gatilhos
 	var px := player.global_position.x
