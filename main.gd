@@ -805,7 +805,7 @@ func _build_world() -> void:
 		box(Vector3(4.5, 1.3, 8.38), Vector3(0.5, 0.5, 0.05), flat(Color(0.1, 0.1, 0.1)), false)
 		box(Vector3(4.5, 1.3, 8.32), Vector3(0.25, 0.25, 0.08), lit(Color(0.8, 0.12, 0.1)), false)
 
-	# ---- Cadillac Eldorado (sobre o elevador animado). O capô ainda não abre.
+	# ---- Cadillac Eldorado (sobre o elevador animado). O capô abre (nó HoodPivot do modelo).
 	car_root = Node3D.new()
 	car_root.position = CAR_BASE
 	add_child(car_root)
@@ -817,10 +817,16 @@ func _build_world() -> void:
 	else:
 		rbox(Vector3(0, 0.7, 0.1), Vector3(1.8, 0.9, 3.8), paint, 0.5, 0.45, false, car_root)
 	hood_pivot = null
+	if uno != null:
+		hood_pivot = uno.find_child("HoodPivot", true, false) as Node3D
+	# compartimento do motor, visível quando o capô abre
+	box(Vector3(0, 0.6, 2.0), Vector3(1.3, 0.06, 1.3), flat(Color(0.04, 0.04, 0.05)), false, car_root)
+	box(Vector3(0, 0.67, 2.05), Vector3(0.7, 0.2, 0.72), flat(Color(0.14, 0.15, 0.17), 0.55, 0.6), false, car_root)
+	box(Vector3(-0.38, 0.69, 1.7), Vector3(0.22, 0.12, 0.2), flat(Color(0.1, 0.1, 0.12), 0.5, 0.5), false, car_root)
 	_add_body_at(car_root, Vector3(0, 0.72, 0.0), Vector3(2.0, 1.44, 5.8))
 	# as baterias do carro ficam guardadas fora de vista (o capô ainda não abre)
 	car_bat = _make_prop("bateria_velha")
-	car_bat.position = Vector3(0, -6.0, 0)
+	car_bat.position = Vector3(0.42, 0.62, 1.75)
 	car_root.add_child(car_bat)
 	car_bat2 = _make_prop("bateria")
 	car_bat2.position = Vector3(0, -6.0, 0)
@@ -1581,8 +1587,10 @@ func _p7() -> void:
 
 func _s2() -> void:
 	sfx(snd_clack, -4.0)
+	sfx(snd_creak, -6.0, 0.8)
 	if hood_pivot != null:
-		create_tween().tween_property(hood_pivot, "rotation:x", deg_to_rad(-68.0), 0.7)
+		var ot := create_tween()
+		ot.tween_property(hood_pivot, "rotation:x", deg_to_rad(-62.0), 1.0).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 
 func _s3() -> void:
@@ -1672,9 +1680,11 @@ func _s9() -> void:
 
 
 func _s10() -> void:
-	sfx(snd_clack, -4.0)
+	sfx(snd_creak, -8.0, 1.1)
 	if hood_pivot != null:
-		create_tween().tween_property(hood_pivot, "rotation:x", 0.0, 0.5)
+		var ct := create_tween()
+		ct.tween_property(hood_pivot, "rotation:x", 0.0, 0.6).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		ct.tween_callback(func(): sfx(snd_clack, -2.0, 0.7))
 	car_state["capo"] = true
 	_render_chk()
 	_finish()
