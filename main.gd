@@ -1450,6 +1450,22 @@ func _noise(dur: float, vol: float, hp: bool = false, k: float = 0.2, fade: bool
 	return _wav(_bytes(a), loop)
 
 
+func _rain_stream() -> AudioStream:
+	# usa assets/audio/chuva.ogg (gravação real, em loop); sem o arquivo, usa as gotas geradas por código
+	var path := _find_asset("res://assets/audio/", "chuva", [".ogg", ".wav", ".mp3"])
+	if path != "":
+		var st = load(path)
+		if st is AudioStreamOggVorbis:
+			(st as AudioStreamOggVorbis).loop = true
+		elif st is AudioStreamMP3:
+			(st as AudioStreamMP3).loop = true
+		elif st is AudioStreamWAV:
+			(st as AudioStreamWAV).loop_mode = AudioStreamWAV.LOOP_FORWARD
+		if st is AudioStream:
+			return st
+	return _rain()
+
+
 func _rain() -> AudioStreamWAV:
 	# só gotas batendo (sem chiado de fundo): estalos curtos e pequenos "plocs", em volume e tom variados
 	var dur := 6.0
@@ -1566,8 +1582,8 @@ func _build_audio() -> void:
 	snd_chime1 = _tone(1320.0, 1.4, 0.3)
 	snd_chime2 = _tone(990.0, 1.6, 0.3)
 	var rain := AudioStreamPlayer.new()
-	rain.stream = _rain()
-	rain.volume_db = -9.0
+	rain.stream = _rain_stream()
+	rain.volume_db = -8.0
 	add_child(rain)
 	rain.play()
 	var hum := AudioStreamPlayer.new()

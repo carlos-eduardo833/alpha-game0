@@ -160,3 +160,5 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 - Chuva: som so de gotas batendo (sem chiado). Radio movido para perto dos pneus, em cima de uma mesa nova (3,7 / 7,0).
 --- VERSAO 51 ---
 - Radio mais baixo e mais direcional; noticia aparece como legenda digitando (a mesma legenda do jogo) ate 15 m do radio. Mais 5 noticias.
+--- VERSAO 52 ---
+- Chuva: som real (chuva.ogg, 46 s em loop sem emenda). Veja CREDITOS.txt.

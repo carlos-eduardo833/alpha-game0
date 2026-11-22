@@ -29,3 +29,4 @@ red_bricks_wall__tile_texture - textura de parede (autor conforme pagina do Sket
 distressed_painted_wall_6.4m_section - textura de parede (autor conforme pagina do Sketchfab)
 aircompressor - modelo 3D do compressor de ar (autor conforme pagina do Sketchfab)
 button_key__factory - modelo 3D do botao do portao (autor conforme pagina do Sketchfab)
+chuva.ogg - gravacao de chuva baixada pelo Charles (preencher autor, site e licenca)
