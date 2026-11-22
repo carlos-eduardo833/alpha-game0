@@ -156,3 +156,5 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 - Bateria atravessava o capo fechado: agora as baterias so aparecem com o capo aberto (menores). Bloco do motor mais baixo.
 --- VERSAO 49 ---
 - Radio: sem chiado e sem voz do sistema. Agora um murmurio de voz incompreensivel + legenda digitando perto do radio.
+--- VERSAO 50 ---
+- Chuva: som so de gotas batendo (sem chiado). Radio movido para perto dos pneus, em cima de uma mesa nova (3,7 / 7,0).

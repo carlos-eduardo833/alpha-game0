@@ -115,7 +115,7 @@ var snd_hiss: AudioStream
 var snd_lift: AudioStream
 var radio_bus := "Master"
 var radio_file := false          # true se o jogador colocou radio.mp3/ogg (aí não há noticiário)
-var radio_pos := Vector3(12.3, 1.0, -2.05)
+var radio_pos := Vector3(3.7, 1.0, 7.0)
 var radio_next := 14.0
 var radio_busy_until := 0.0
 var radio_i := 0
@@ -1034,15 +1034,16 @@ func _build_world() -> void:
 
 	# recepção (direita)
 	_table(Vector3(12.3, 0.0, -2.05), Vector3(2.4, 0.9, 1.1), 90.0)
+	_table(Vector3(3.7, 0.0, 7.0), Vector3(1.2, 0.9, 0.7))
 	var rad := _baked("radio")
 	if rad != null:
-		rad.position = Vector3(12.3, 0.9, -2.05)
-		rad.rotation_degrees.y = -78.0
+		rad.position = Vector3(3.7, 0.9, 7.0)
+		rad.rotation_degrees.y = 190.0
 		rad.scale = Vector3.ONE * 1.8
 		add_child(rad)
 	else:
-		rbox(Vector3(12.3, 1.04, -2.05), Vector3(0.5, 0.28, 0.2), flat(Color(0.25, 0.16, 0.1)), 0.35, 0.35, false)
-		box(Vector3(12.3, 1.06, -2.05), Vector3(0.14, 0.06, 0.01), lit(Color(0.9, 0.6, 0.2)), false)
+		rbox(Vector3(3.7, 1.04, 7.0), Vector3(0.5, 0.28, 0.2), flat(Color(0.25, 0.16, 0.1)), 0.35, 0.35, false)
+		box(Vector3(3.7, 1.06, 7.0), Vector3(0.14, 0.06, 0.01), lit(Color(0.9, 0.6, 0.2)), false)
 	var sofa := _baked("sofa")
 	if sofa != null:
 		sofa.position = Vector3(10.3, 0.0, 3.2)
@@ -1450,22 +1451,35 @@ func _noise(dur: float, vol: float, hp: bool = false, k: float = 0.2, fade: bool
 
 
 func _rain() -> AudioStreamWAV:
-	var n := SR * 4
+	# só gotas batendo (sem chiado de fundo): estalos curtos e pequenos "plocs", em volume e tom variados
+	var dur := 6.0
+	var n := int(SR * dur)
 	var a := PackedFloat32Array()
 	a.resize(n)
-	var y1 := 0.0
-	var y2 := 0.0
-	var drop := 0.0
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 77
+	var drops := int(dur * 70.0)
+	for d in drops:
+		var start := rng.randi_range(0, n - 1)
+		var amp := rng.randf_range(0.08, 0.5) * (0.5 if rng.randf() < 0.5 else 1.0)
+		var dl := rng.randi_range(120, 480)
+		var tone := rng.randf() < 0.35
+		var f := rng.randf_range(900.0, 2600.0)
+		var ph := rng.randf() * TAU
+		var y := 0.0
+		for k in dl:
+			var idx := (start + k) % n
+			var env := exp(-float(k) / float(dl) * 6.0)
+			var v := 0.0
+			if tone:
+				v = sin(ph + TAU * f * float(k) / float(SR) * (1.0 + 0.3 * env)) * env
+			else:
+				var x := rng.randf() * 2.0 - 1.0
+				y += (x - y) * 0.6
+				v = (x - y) * env
+			a[idx] += v * amp
 	for i in n:
-		var x := randf() * 2.0 - 1.0
-		y1 += (x - y1) * 0.3
-		y2 += (x - y2) * 0.03
-		var band := y1 - y2
-		if randf() < 0.0008:
-			drop = randf_range(0.3, 0.9) * (1.0 if randf() > 0.5 else -1.0)
-		drop *= 0.985
-		var gust := 1.0 + 0.25 * sin(TAU * float(i) / float(n) * 2.0)
-		a[i] = (band * 0.9 + drop * 0.5 + y2 * 1.5) * gust * 0.55
+		a[i] = clampf(a[i], -0.95, 0.95)
 	return _wav(_bytes(a), true)
 
 
@@ -1553,7 +1567,7 @@ func _build_audio() -> void:
 	snd_chime2 = _tone(990.0, 1.6, 0.3)
 	var rain := AudioStreamPlayer.new()
 	rain.stream = _rain()
-	rain.volume_db = -14.0
+	rain.volume_db = -9.0
 	add_child(rain)
 	rain.play()
 	var hum := AudioStreamPlayer.new()
