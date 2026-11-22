@@ -121,6 +121,11 @@ var snd_chime1: AudioStream
 var snd_chime2: AudioStream
 var snd_hiss: AudioStream
 var snd_lift: AudioStream
+var snd_lift_up: AudioStream      # elevador_sobe.ogg (opcional)
+var snd_lift_down: AudioStream    # elevador_desce.ogg (opcional)
+var snd_hood_open: AudioStream    # capo_abrindo.ogg (opcional)
+var snd_hood_close: AudioStream   # capo_fechando.ogg (opcional)
+var snd_lock: AudioStream         # trava_janela.ogg (opcional)
 var radio_bus := "Master"
 var radio_file := false          # true se o jogador colocou radio.mp3/ogg (aí não há noticiário)
 var radio_pos := Vector3(6.45, 1.0, -4.5)
@@ -717,10 +722,21 @@ func _aim_at(p: Vector3, r: float, maxd: float) -> bool:
 	return (v - d * t).length() < r
 
 
+func _opt_snd(base: String) -> AudioStream:
+	var p := _find_asset("res://assets/audio/", base, [".ogg", ".wav", ".mp3"])
+	if p == "":
+		return null
+	return load(p) as AudioStream
+
+
 func _lift_toggle() -> void:
 	if lift_anim == null or lift_state == 1 or lift_state == 3:
 		return
-	sfx(snd_lift, -8.0)
+	var lsnd: AudioStream = snd_lift_up if lift_state == 0 else snd_lift_down
+	if lsnd != null:
+		sfx3(lsnd, lift_switch_3d, -4.0)
+	else:
+		sfx(snd_lift, -8.0)
 	lift_anim.speed_scale = LIFT_SPEED
 	if lift_state == 0 and anim_up != "":
 		lift_state = 1
@@ -1706,6 +1722,11 @@ func _build_audio() -> void:
 		snd_gate_file = load(pg)
 	snd_hiss = _noise(1.0, 0.5, true, 0.3, true)
 	snd_lift = _tone(70.0, 6.5, 0.3, 85.0, 1)
+	snd_lift_up = _opt_snd("elevador_sobe")
+	snd_lift_down = _opt_snd("elevador_desce")
+	snd_hood_open = _opt_snd("capo_abrindo")
+	snd_hood_close = _opt_snd("capo_fechando")
+	snd_lock = _opt_snd("trava_janela")
 	snd_chime1 = _tone(1320.0, 1.4, 0.3)
 	snd_chime2 = _tone(990.0, 1.6, 0.3)
 	var rain := AudioStreamPlayer.new()
@@ -1827,28 +1848,31 @@ func _p3() -> void:
 
 
 func _p4() -> void:
-	sfx(snd_clack, -6.0)
+	sfx(snd_lock if snd_lock != null else snd_clack, -4.0)
 	say("Trava da janela direita: ok.", 2.5)
 
 
 func _p5() -> void:
-	sfx(snd_clack, -6.0)
+	sfx(snd_lock if snd_lock != null else snd_clack, -4.0)
 	say("Trava da janela esquerda: ok. ...Tinha algo se mexendo lá fora?", 4.0)
 
 
 func _p6() -> void:
-	sfx(snd_creak, -8.0, 0.8)
+	sfx(snd_lock if snd_lock != null else snd_creak, -4.0)
 	say("Janela do depósito: a trava estava frouxa. Apertei.", 3.5)
 
 
 func _p7() -> void:
-	sfx(snd_clack, -6.0)
+	sfx(snd_lock if snd_lock != null else snd_clack, -4.0)
 	say("Janela da recepção: ok. Hora de fechar o serviço.", 3.0)
 
 
 func _s2() -> void:
-	sfx(snd_clack, -4.0)
-	sfx(snd_creak, -6.0, 0.8)
+	if snd_hood_open != null:
+		sfx(snd_hood_open, -2.0)
+	else:
+		sfx(snd_clack, -4.0)
+		sfx(snd_creak, -6.0, 0.8)
 	bay_light.visible = true
 	if hood_pivot != null:
 		var ot := create_tween()
@@ -2100,12 +2124,16 @@ func _s9() -> void:
 
 
 func _s10() -> void:
-	sfx(snd_creak, -8.0, 1.1)
+	if snd_hood_close != null:
+		get_tree().create_timer(0.25).timeout.connect(sfx.bind(snd_hood_close, -2.0))
+	else:
+		sfx(snd_creak, -8.0, 1.1)
 	bay_light.visible = false
 	if hood_pivot != null:
 		var ct := create_tween()
 		ct.tween_property(hood_pivot, "rotation:x", 0.0, 0.6).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-		ct.tween_callback(func(): sfx(snd_clack, -2.0, 0.7))
+		if snd_hood_close == null:
+			ct.tween_callback(func(): sfx(snd_clack, -2.0, 0.7))
 	car_state["capo"] = true
 	_render_chk()
 	_finish()
@@ -2190,11 +2218,13 @@ func _process(_delta: float) -> void:
 	if lift_anim != null:
 		if lift_state == 1 and not lift_anim.is_playing():
 			lift_state = 2
-			sfx(snd_clack, -4.0)
+			if snd_lift_up == null:
+				sfx(snd_clack, -4.0)
 		elif lift_state == 3 and lift_anim.current_animation_position >= LIFT_DOWN_END:
 			lift_anim.pause()
 			lift_state = 0
-			sfx(snd_clack, -4.0)
+			if snd_lift_down == null:
+				sfx(snd_clack, -4.0)
 
 
 func _near(at: Vector2, r: float) -> bool:

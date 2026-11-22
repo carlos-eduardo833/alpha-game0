@@ -37,3 +37,4 @@ hammer, flathead_screwdriver, simple_philips_screwdriver, screwdriver_01, screwd
 retro_multimeter - modelo 3D do multimetro (autor conforme pagina do Sketchfab; preencher autor e licenca)
 material_corrugated_sheet_metal - textura da chapa ondulada do portao (autor conforme pagina do Sketchfab; preencher autor e licenca)
 portao_fechando.ogg - gate-closing (freesound 496740, usuario 16gpanskakomarkova_marina; conferir licenca na pagina)
+capo_abrindo, capo_fechando, trava_janela, elevador (car_lift) - sons baixados pelo Charles (preencher autor, site e licenca)

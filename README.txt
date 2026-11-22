@@ -193,3 +193,5 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 - Painel fixo na frente do trilho do portao (ele passa por tras). Elevador sobe mais (LIFT_SCALE_Y). Arvores proximas das janelas do deposito e da recepcao. Caixa vermelha da bancada removida de verdade. Lanterna na frente da mesa. Larry colado no vidro (z -8,47).
 --- VERSAO 66 ---
 - Caixa de ferramentas (modelo) devolvida a mesa de ferramentas (tinha sido removida por engano na v63).
+--- VERSAO 67 ---
+- Sons reais: capo abrindo/fechando, trava da janela (rondas), elevador subindo/descendo (trechos de 6 s). Sem esses arquivos o jogo volta aos sons gerados por codigo.
