@@ -162,3 +162,5 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 - Radio mais baixo e mais direcional; noticia aparece como legenda digitando (a mesma legenda do jogo) ate 15 m do radio. Mais 5 noticias.
 --- VERSAO 52 ---
 - Chuva: som real (chuva.ogg, 46 s em loop sem emenda). Veja CREDITOS.txt.
+--- VERSAO 53 ---
+- Passos: 6 passos gravados (footstep.m4a cortado em passo1..6.ogg), sorteados a cada passada.

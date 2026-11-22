@@ -8,3 +8,7 @@ RADIO DA OFICINA
 CHUVA
 - O jogo usa assets/audio/chuva.ogg (gravacao de chuva em loop). Para trocar, coloque outro arquivo com esse nome
   (chuva.ogg, chuva.wav ou chuva.mp3). Sem o arquivo, ele usa gotas geradas por codigo.
+
+PASSOS
+- O jogo usa passo1.ogg ... passo6.ogg (passos gravados, sorteados a cada passada, tambem nos passos de fora na chuva).
+  Para trocar, substitua esses arquivos (ou apague-os para voltar ao passo gerado por codigo).

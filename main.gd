@@ -107,6 +107,7 @@ var sub_tween: Tween
 var snd_creak: AudioStream
 var snd_clack: AudioStream
 var snd_step: AudioStream
+var snd_steps: Array = []        # passos gravados (assets/audio/passo1..6.ogg)
 var snd_gate: AudioStream
 var snd_gate2: AudioStream
 var snd_chime1: AudioStream
@@ -1575,6 +1576,10 @@ func _build_audio() -> void:
 	snd_creak = _tone(180.0, 1.2, 0.3, 90.0, 1)
 	snd_clack = _tone(300.0, 0.08, 0.4, -1.0, 2)
 	snd_step = _noise(0.1, 0.5, false, 0.15, true)
+	for si in range(1, 7):
+		var sp := _find_asset("res://assets/audio/", "passo" + str(si), [".ogg", ".wav", ".mp3"])
+		if sp != "":
+			snd_steps.append(load(sp))
 	snd_gate = _noise(2.0, 0.6, false, 0.05, true)
 	snd_gate2 = _tone(60.0, 2.0, 0.3, -1.0, 1)
 	snd_hiss = _noise(1.0, 0.5, true, 0.3, true)
@@ -1705,6 +1710,12 @@ func _larry_appear() -> void:
 	zt.tween_property(cam, "fov", base_fov, 0.7).set_trans(Tween.TRANS_SINE)
 
 
+func _step_snd() -> AudioStream:
+	if snd_steps.is_empty():
+		return snd_step
+	return snd_steps[randi() % snd_steps.size()]
+
+
 func sfx3(s: AudioStream, pos: Vector3, db: float = 0.0, pitch: float = 1.0) -> void:
 	# som posicional (vem de um ponto da oficina)
 	var p := AudioStreamPlayer3D.new()
@@ -1737,7 +1748,7 @@ func _anomalies() -> void:
 			var tw := create_tween()
 			for i in 5:
 				var pos := Vector3(side * (8.0 - i * 1.2), 1.0, -11.5)
-				tw.tween_callback(sfx3.bind(snd_step, pos, -4.0, 0.7))
+				tw.tween_callback(func(): sfx3(_step_snd(), pos, -2.0, 0.85))
 				tw.tween_interval(0.62)
 		2:   # batidas no portão
 			for i in 3:
@@ -2034,7 +2045,7 @@ func _physics_process(delta: float) -> void:
 		step_acc += delta * sp
 		if step_acc > 1.7:
 			step_acc = 0.0
-			sfx(snd_step, -14.0, randf_range(0.8, 1.2))
+			sfx(_step_snd(), -6.0 if not snd_steps.is_empty() else -14.0, randf_range(0.95, 1.05))
 
 	# gatilhos
 	var px := player.global_position.x
