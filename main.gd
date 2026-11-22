@@ -1966,8 +1966,6 @@ func _build_audio() -> void:
 	snd_lock = _opt_snd("trava_janela")
 	snd_comp_off = _opt_snd("compressor_desliga")
 	snd_pour = _opt_snd("oleo_caindo")
-	if snd_pour == null:
-		snd_pour = _pour(4.0)
 	snd_chime1 = _tone(1320.0, 1.4, 0.3)
 	snd_chime2 = _tone(990.0, 1.6, 0.3)
 	var rain := AudioStreamPlayer.new()
