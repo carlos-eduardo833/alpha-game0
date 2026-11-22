@@ -1797,6 +1797,11 @@ const RADIO_NEWS := [
 	"Boletim das três horas. A temperatura é de quatorze graus. Não há previsão de que a chuva pare.",
 	"Moradores relatam ruídos estranhos perto da rodovia durante a noite. A prefeitura diz que não há motivo para alarme.",
 	"Lembrete aos ouvintes: nunca atenda a porta depois da meia-noite. Obrigado por ficar conosco.",
+	"Esportes: o time da cidade perdeu por dois a zero no jogo de ontem e continua na zona de rebaixamento.",
+	"Economia: o preço do combustível sobe pela terceira semana seguida. Postos da rodovia reclamam da queda no movimento noturno.",
+	"Atenção, motoristas: a polícia pede que qualquer pessoa que tenha visto um vulto à beira da estrada entre em contato.",
+	"A previsão para amanhã é de céu nublado. O sol, segundo os meteorologistas, não deve aparecer tão cedo.",
+	"Esta é a Rádio Estrada FM. Se você está ouvindo esta transmissão, fique onde está e não saia da oficina.",
 ]
 
 
@@ -1809,27 +1814,20 @@ func _radio_tick() -> void:
 	radio_i += 1
 	var dur := 2.0 + float(text.length()) * 0.075
 	radio_next = t + dur + randf_range(3.0, 7.0)
-	if dist < 20.0 and radio_babble.size() > 0:
+	if dist < 16.0 and radio_babble.size() > 0:
 		var bp := AudioStreamPlayer3D.new()
 		bp.stream = radio_babble[randi() % radio_babble.size()]
 		bp.bus = radio_bus
-		bp.unit_size = 5.0
-		bp.max_distance = 30.0
-		bp.volume_db = -3.0
+		bp.unit_size = 2.5
+		bp.max_distance = 16.0
+		bp.volume_db = -16.0
 		bp.position = radio_pos
 		add_child(bp)
 		bp.play()
 		get_tree().create_timer(minf(dur * 0.85, 5.0)).timeout.connect(bp.queue_free)
-	if dist < 7.0:
-		l_radio.text = "[Rádio] " + text
-		l_radio.visible_characters = 0
-		l_radio.modulate.a = 1.0
-		if radio_tween:
-			radio_tween.kill()
-		radio_tween = create_tween()
-		radio_tween.tween_property(l_radio, "visible_characters", l_radio.text.length(), dur * 0.8)
-		radio_tween.tween_interval(2.0)
-		radio_tween.tween_property(l_radio, "modulate:a", 0.0, 0.6)
+	if dist < 15.0:
+		say("[Rádio] " + text, 3.0)
+
 
 
 func _larry_duck(seen: bool) -> void:

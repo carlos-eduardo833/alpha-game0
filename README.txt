@@ -158,3 +158,5 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 - Radio: sem chiado e sem voz do sistema. Agora um murmurio de voz incompreensivel + legenda digitando perto do radio.
 --- VERSAO 50 ---
 - Chuva: som so de gotas batendo (sem chiado). Radio movido para perto dos pneus, em cima de uma mesa nova (3,7 / 7,0).
+--- VERSAO 51 ---
+- Radio mais baixo e mais direcional; noticia aparece como legenda digitando (a mesma legenda do jogo) ate 15 m do radio. Mais 5 noticias.
