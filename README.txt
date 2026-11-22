@@ -139,3 +139,5 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 --- VERSAO 41 ---
 - Larry: nova animacao (vira o rosto e abaixa reto).
 - Calibrador agora no compressor. Caixa de ferramentas sobre mesa (x=2,7) com quadro de ferramentas na parede.
+--- VERSAO 42 ---
+- Corrigido erro de variaveis duplicadas (dark/wood) no quadro de ferramentas.

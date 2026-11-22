@@ -964,8 +964,8 @@ func _build_world() -> void:
 	# quadro de ferramentas (pegboard) na parede, acima da caixa
 	var peg := box(Vector3(2.7, 2.45, -8.38), Vector3(1.7, 0.9, 0.04), flat(Color(0.33, 0.25, 0.18)), false)
 	var steel := flat(Color(0.5, 0.52, 0.56), 0.5, 0.6)
-	var dark := flat(Color(0.16, 0.16, 0.18), 0.6, 0.5)
-	var wood := flat(Color(0.4, 0.26, 0.14))
+	var peg_dark := flat(Color(0.16, 0.16, 0.18), 0.6, 0.5)
+	var peg_wood := flat(Color(0.4, 0.26, 0.14))
 	var yellow := flat(Color(0.75, 0.6, 0.12))
 	var redh := flat(Color(0.6, 0.1, 0.08))
 	# chaves de boca (3 tamanhos)
@@ -975,8 +975,8 @@ func _build_world() -> void:
 		box(Vector3(wx, 0.05, 0.035), Vector3(0.035, wl, 0.015), steel, false, peg)
 		box(Vector3(wx, 0.05 + wl / 2.0, 0.035), Vector3(0.09, 0.07, 0.015), steel, false, peg)
 	# martelo
-	box(Vector3(-0.15, 0.0, 0.035), Vector3(0.04, 0.5, 0.025), wood, false, peg)
-	box(Vector3(-0.15, 0.27, 0.035), Vector3(0.16, 0.07, 0.03), dark, false, peg)
+	box(Vector3(-0.15, 0.0, 0.035), Vector3(0.04, 0.5, 0.025), peg_wood, false, peg)
+	box(Vector3(-0.15, 0.27, 0.035), Vector3(0.16, 0.07, 0.03), peg_dark, false, peg)
 	# chaves de fenda
 	for i in 3:
 		var sx := 0.05 + i * 0.1
