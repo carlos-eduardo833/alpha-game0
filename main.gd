@@ -119,7 +119,7 @@ var radio_pos := Vector3(12.3, 1.0, -2.05)
 var radio_next := 14.0
 var radio_busy_until := 0.0
 var radio_i := 0
-var radio_voice := ""
+var radio_babble: Array = []     # trechos de "voz" incompreensível (murmúrio)
 var l_radio: Label
 var radio_tween: Tween
 var larry: Node3D
@@ -141,9 +141,8 @@ func _ready() -> void:
 	_build_hud()
 	_build_steps()
 	_build_audio()
-	var vz := DisplayServer.tts_get_voices_for_language("pt")
-	if vz.size() > 0:
-		radio_voice = vz[0]
+	for bi in 4:
+		radio_babble.append(_babble(5.0, 1000 + bi * 17))
 	_set_obj()
 	_render_chk()
 	_show_overlay("Turno da Madrugada: Km 42", "Parte 1: A rotina\n\nUma oficina antiga na beira da rodovia, cercada de mata fechada. Chove fino lá fora. O chefe não vai conseguir voltar, e você está sozinho no turno.\n\nW A S D: andar     Mouse: olhar     E: interagir     Shift: correr     F11: tela cheia     Esc: pausa\n\nElevador: aponte a mira para o motor do elevador e aperte E para subir ou descer o carro.", "Começar")
@@ -1484,7 +1483,7 @@ func _radio_stream() -> AudioStream:
 			radio_file = true
 			return st
 	_ensure_radio_bus()
-	return _radio()
+	return null
 
 
 func _ensure_radio_bus() -> void:
@@ -1570,7 +1569,8 @@ func _build_audio() -> void:
 	radio.max_distance = 35.0
 	radio.volume_db = -9.0
 	add_child(radio)
-	radio.play()
+	if radio.stream != null:
+		radio.play()
 
 
 # ---------------------------------------------------------------- etapas da Parte 1
@@ -1722,6 +1722,49 @@ func _anomalies() -> void:
 			say("...", 1.5)
 
 
+func _babble(dur: float, seed_: int) -> AudioStreamWAV:
+	# murmúrio de voz humana (vogais sintetizadas, sem palavras): dá a impressão de alguém falando no rádio
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_
+	var n := int(SR * dur)
+	var a := PackedFloat32Array()
+	a.resize(n)
+	var ph := 0.0
+	var f0 := 118.0 + rng.randf_range(-8.0, 8.0)
+	var i := 0
+	var y11 := 0.0
+	var y12 := 0.0
+	var y21 := 0.0
+	var y22 := 0.0
+	while i < n:
+		var syl := int(SR * rng.randf_range(0.08, 0.17))
+		var gap := 0
+		if rng.randf() < 0.28:
+			gap = int(SR * rng.randf_range(0.10, 0.22))
+		var fa := rng.randf_range(300.0, 800.0)
+		var fb := rng.randf_range(900.0, 2200.0)
+		var r := 0.985
+		var c1 := 2.0 * r * cos(TAU * fa / float(SR))
+		var c2 := 2.0 * r * cos(TAU * fb / float(SR))
+		var pitch := f0 * rng.randf_range(0.9, 1.15)
+		for k in syl:
+			if i >= n:
+				break
+			var env := sin(PI * float(k) / float(syl))
+			ph += pitch / float(SR)
+			var src := (fposmod(ph, 1.0) * 2.0 - 1.0) * 0.5 + (rng.randf() - 0.5) * 0.15
+			var o1 := src * 0.06 + c1 * y11 - r * r * y12
+			y12 = y11
+			y11 = o1
+			var o2 := src * 0.05 + c2 * y21 - r * r * y22
+			y22 = y21
+			y21 = o2
+			a[i] = clampf((o1 + o2) * env * 1.4, -1.0, 1.0)
+			i += 1
+		i += gap
+	return _wav(_bytes(a), false)
+
+
 func offset_radio_fix(l: Label) -> void:
 	l.offset_top = -120.0
 	l.offset_bottom = -20.0
@@ -1752,11 +1795,17 @@ func _radio_tick() -> void:
 	radio_i += 1
 	var dur := 2.0 + float(text.length()) * 0.075
 	radio_next = t + dur + randf_range(3.0, 7.0)
-	sfx3(snd_hiss, radio_pos, -14.0, 1.6)
-	if dist < 16.0 and radio_voice != "":
-		var vol := int(clampf(100.0 - dist * 5.5, 0.0, 100.0))
-		if vol > 5:
-			DisplayServer.tts_speak(text, radio_voice, vol, 0.85, 0.92)
+	if dist < 20.0 and radio_babble.size() > 0:
+		var bp := AudioStreamPlayer3D.new()
+		bp.stream = radio_babble[randi() % radio_babble.size()]
+		bp.bus = radio_bus
+		bp.unit_size = 5.0
+		bp.max_distance = 30.0
+		bp.volume_db = -3.0
+		bp.position = radio_pos
+		add_child(bp)
+		bp.play()
+		get_tree().create_timer(minf(dur * 0.85, 5.0)).timeout.connect(bp.queue_free)
 	if dist < 7.0:
 		l_radio.text = "[Rádio] " + text
 		l_radio.visible_characters = 0
