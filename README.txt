@@ -175,3 +175,5 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 - 6 tomadas (2 por comodo) e 3 interruptores de luz nas paredes; espingarda pendurada na parede da recepcao.
 --- VERSAO 57 ---
 - Multimetro trocado pelo retro_multimeter (texturas melhores), em pe sobre a bancada com os cabos na frente. Veja CREDITOS.txt.
+--- VERSAO 58 ---
+- Floresta mais densa e mais perto da garagem (duas copias extras). Som de curto-circuito tambem ao entrar no deposito e no susto do Larry.

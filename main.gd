@@ -1125,6 +1125,14 @@ func _build_world() -> void:
 		add_child(fl)
 		_tint(fl, Color(0.30, 0.36, 0.52))   # noite: mata azulada e escura
 		_set_layers(fl, 2)
+		# mais duas cópias deslocadas para os lados: mata mais densa e mais perto da garagem
+		for fx in [7.0, -7.0]:
+			var fl2 := _baked("floresta")
+			if fl2 != null:
+				fl2.position = Vector3(fx, -0.5, -25.0)
+				add_child(fl2)
+				_tint(fl2, Color(0.30, 0.36, 0.52))
+				_set_layers(fl2, 2)
 	var moon := DirectionalLight3D.new()
 	moon.light_color = Color(0.55, 0.65, 0.95)
 	moon.light_energy = 0.45
@@ -1779,6 +1787,8 @@ func _larry_appear() -> void:
 	sfx(snd_creak, -2.0, 0.7)
 	sfx(snd_clack, -2.0, 0.6)
 	flick_until = t + 0.5
+	if snd_short != null:
+		sfx3(snd_short, Vector3(0.0, 3.0, 0.0), -3.0)
 	var base_fov := 75.0
 	var zt := create_tween()
 	zt.tween_property(cam, "fov", base_fov * 0.55, 0.18).set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_OUT)
@@ -2143,6 +2153,8 @@ func _physics_process(delta: float) -> void:
 		in_dep = true
 		sfx(snd_creak, -10.0)
 		flick_until = t + 0.6
+		if snd_short != null:
+			sfx3(snd_short, Vector3(-9.0, 3.0, 0.0), -3.0)
 		say("O corredor dos fundos é sempre frio...", 3.5)
 	# as baterias só aparecem com o capô aberto (fechado, elas atravessariam a chapa)
 	if hood_pivot != null:
