@@ -850,16 +850,16 @@ func _build_world() -> void:
 	var gate_mat: Material = rust
 	var gate_tex = load("res://assets/textures/portao_chapa.jpg")
 	if gate_tex is Texture2D:
-		var gm := StandardMaterial3D.new()
-		gm.albedo_texture = gate_tex
-		gm.albedo_color = Color(0.85, 0.82, 0.78)
-		gm.roughness = 0.65
-		gm.metallic = 0.35
-		gm.uv1_triplanar = true            # projeção presa ao próprio portão (acompanha quando ele sobe)
-		gm.uv1_world_triplanar = false
-		gm.uv1_scale = Vector3(0.5, 0.5, 0.5)   # 1 repetição a cada 2 m: ondas de ~10 cm, linhas na horizontal
-		gm.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
-		gate_mat = gm
+		var gate_m := StandardMaterial3D.new()
+		gate_m.albedo_texture = gate_tex
+		gate_m.albedo_color = Color(0.85, 0.82, 0.78)
+		gate_m.roughness = 0.65
+		gate_m.metallic = 0.35
+		gate_m.uv1_triplanar = true            # projeção presa ao próprio portão (acompanha quando ele sobe)
+		gate_m.uv1_world_triplanar = false
+		gate_m.uv1_scale = Vector3(0.5, 0.5, 0.5)   # 1 repetição a cada 2 m: ondas de ~10 cm, linhas na horizontal
+		gate_m.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
+		gate_mat = gate_m
 	gate = box(Vector3(0, 5.9, 8.35), Vector3(6, 3.2, 0.12), gate_mat, false)
 	box(Vector3(0, -1.58, 0), Vector3(6, 0.08, 0.16), flat(Color(0.2, 0.2, 0.22)), false, gate)   # barra de baixo
 	var btn := _baked("botao")
