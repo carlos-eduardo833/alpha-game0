@@ -212,3 +212,5 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 - Oleo: som de liquido caindo (gerado por codigo, toca enquanto segura E; para se soltar). Para trocar, coloque assets/audio/oleo_caindo.ogg. Anomalia da porta que range sozinha removida.
 --- VERSAO 76 ---
 - Barulho do oleo removido (sem som ao completar o oleo). So toca se existir assets/audio/oleo_caindo.ogg.
+--- VERSAO 77 ---
+- Compressor ligado por mais tempo: o trecho dele funcionando foi repetido (emendas suaves), total 7,7 s, e a fala 'Normal' vem no fim.

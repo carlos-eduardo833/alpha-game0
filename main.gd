@@ -2407,7 +2407,7 @@ func _s9() -> void:
 		# o compressor desliga sozinho um instante depois: confirma que funcionou (e dá um susto de rotina)
 		get_tree().create_timer(1.6).timeout.connect(func():
 			sfx3(snd_comp_off, Vector3(0.6, 0.7, -8.14), 0.0)
-			get_tree().create_timer(2.8).timeout.connect(func():
+			get_tree().create_timer(7.2).timeout.connect(func():
 				if not over:
 					say("...Só o compressor desligando. Normal.", 3.0)))
 
