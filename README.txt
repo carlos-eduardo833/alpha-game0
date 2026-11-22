@@ -200,3 +200,5 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 --- VERSAO 69 ---
 - Capo: so os audios enviados (sem sons gerados por codigo, sem a batida grave do fim). Cortei 0,6 s de silencio do inicio do capo_abrindo e tirei o atraso do capo_fechando.
 - (v70) corrige a v69, que saiu com o main.gd corrompido por engano; conteudo igual ao descrito acima.
+--- VERSAO 71 ---
+- Radio movido para a bancada da prancheta (fundo, ao lado). Prancheta na mao dura 7 s e o jogador fica travado (sem andar nem olhar) ate ela voltar para a mesa.

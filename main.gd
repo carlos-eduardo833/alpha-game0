@@ -128,7 +128,7 @@ var snd_hood_close: AudioStream   # capo_fechando.ogg (opcional)
 var snd_lock: AudioStream         # trava_janela.ogg (opcional)
 var radio_bus := "Master"
 var radio_file := false          # true se o jogador colocou radio.mp3/ogg (aí não há noticiário)
-var radio_pos := Vector3(6.45, 1.0, -4.5)
+var radio_pos := Vector3(-5.35, 1.0, -8.15)
 var radio_next := 14.0
 var radio_busy_until := 0.0
 var radio_i := 0
@@ -973,11 +973,11 @@ func _build_world() -> void:
 	_table(Vector3(-5.0, 0.0, -7.8), Vector3(2.4, 0.9, 1.1))
 	clip = _baked("prancheta")
 	if clip != null:
-		clip.position = Vector3(-5.7, 0.9, -7.8)
+		clip.position = Vector3(-5.7, 0.9, -7.62)
 		clip.rotation_degrees.y = 20.0
 		add_child(clip)
 	else:
-		clip = box(Vector3(-5.7, 0.93, -7.8), Vector3(0.35, 0.03, 0.25), flat(Color(0.85, 0.85, 0.78)), false)
+		clip = box(Vector3(-5.7, 0.93, -7.62), Vector3(0.35, 0.03, 0.25), flat(Color(0.85, 0.85, 0.78)), false)
 	# folha de papel com escrita borrada em cima da prancheta
 	var pp_img := Image.create(24, 32, false, Image.FORMAT_RGBA8)
 	pp_img.fill(Color(0.88, 0.86, 0.78))
@@ -1002,7 +1002,7 @@ func _build_world() -> void:
 	pp_mesh.size = Vector3(0.17, 0.004, 0.25)
 	pp_sheet.mesh = pp_mesh
 	pp_sheet.material_override = pp_mat
-	pp_sheet.position = Vector3(-5.7, 0.9 + 0.046, -7.8)
+	pp_sheet.position = Vector3(-5.7, 0.9 + 0.046, -7.62)
 	pp_sheet.rotation_degrees.y = 20.0
 	add_child(pp_sheet)
 	pp_sheet_n = pp_sheet
@@ -1089,7 +1089,7 @@ func _build_world() -> void:
 	_lying("chave_ajustavel", Vector3(2.15, 0.9, -7.7), 20.0, 0.016)
 	_lying("chave_fenda", Vector3(3.1, 0.9, -7.68), -35.0, 0.015)
 	_lying("philips", Vector3(3.3, 0.9, -7.8), 70.0, 0.017)
-	_lying("martelo", Vector3(-5.15, 0.9, -8.1), 8.0, 0.0, true)
+	_lying("martelo", Vector3(-5.95, 0.9, -8.1), 8.0, 0.0, true)
 	_lying("lanterna", Vector3(-5.1, 0.9, -7.5), -12.0, 0.036, true)
 	# morsa presa na quina da bancada (a manivela fica para fora da borda)
 	var vice := _baked("morsa")
@@ -1128,16 +1128,15 @@ func _build_world() -> void:
 
 	# recepção (direita)
 	_table(Vector3(12.3, 0.0, -2.05), Vector3(2.4, 0.9, 1.1), 90.0)
-	_table(Vector3(6.45, 0.0, -4.5), Vector3(1.2, 0.9, 0.7), 90.0)
 	var rad := _baked("radio")
 	if rad != null:
-		rad.position = Vector3(6.45, 0.9, -4.5)
-		rad.rotation_degrees.y = -90.0
+		rad.position = Vector3(-5.35, 0.9, -8.15)
+		rad.rotation_degrees.y = 5.0
 		rad.scale = Vector3.ONE * 1.8
 		add_child(rad)
 	else:
-		rbox(Vector3(6.45, 1.04, -4.5), Vector3(0.5, 0.28, 0.2), flat(Color(0.25, 0.16, 0.1)), 0.35, 0.35, false)
-		box(Vector3(6.45, 1.06, -4.5), Vector3(0.14, 0.06, 0.01), lit(Color(0.9, 0.6, 0.2)), false)
+		rbox(Vector3(-5.35, 1.04, -8.15), Vector3(0.5, 0.28, 0.2), flat(Color(0.25, 0.16, 0.1)), 0.35, 0.35, false)
+		box(Vector3(-5.35, 1.06, -8.15), Vector3(0.14, 0.06, 0.01), lit(Color(0.9, 0.6, 0.2)), false)
 	var sofa := _baked("sofa")
 	if sofa != null:
 		sofa.position = Vector3(10.3, 0.0, 3.2)
@@ -1812,7 +1811,7 @@ func _hold_clip() -> void:
 	if pp_sheet_n != null:
 		pp_sheet_n.visible = false
 	clip_in_hand = true
-	get_tree().create_timer(11.0).timeout.connect(_put_clip_back)
+	get_tree().create_timer(7.0).timeout.connect(_put_clip_back)
 
 
 func _put_clip_back() -> void:
@@ -1829,7 +1828,7 @@ func _put_clip_back() -> void:
 
 func _s1() -> void:
 	_hold_clip()
-	say("Ordem de serviço, Cadillac Eldorado: 1) Ver embaixo no elevador   2) Completar o óleo   3) Verificar a bateria   4) Calibrar os pneus   5) Ronda: checar as travas das janelas", 10.0)
+	say("Ordem de serviço, Cadillac Eldorado: 1) Ver embaixo no elevador   2) Completar o óleo   3) Verificar a bateria   4) Calibrar os pneus   5) Ronda: checar as travas das janelas", 2.5)
 
 
 func _l1() -> void:
@@ -2190,7 +2189,7 @@ func _end_screen() -> void:
 
 # ---------------------------------------------------------------- entrada e loop
 func _unhandled_input(ev: InputEvent) -> void:
-	if ev is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED and not paused:
+	if ev is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED and not paused and not clip_in_hand:
 		player.rotation.y -= ev.relative.x * 0.0022
 		pitch = clampf(pitch - ev.relative.y * 0.0022, -1.4, 1.4)
 		cam.rotation.x = pitch
@@ -2235,7 +2234,7 @@ func _physics_process(delta: float) -> void:
 	# movimento
 	var dx := 0.0
 	var dz := 0.0
-	if not over:
+	if not over and not clip_in_hand:
 		dx = float(Input.is_physical_key_pressed(KEY_D)) - float(Input.is_physical_key_pressed(KEY_A))
 		dz = float(Input.is_physical_key_pressed(KEY_S)) - float(Input.is_physical_key_pressed(KEY_W))
 	var dir := player.global_transform.basis * Vector3(dx, 0, dz)
