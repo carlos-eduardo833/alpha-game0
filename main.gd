@@ -21,7 +21,7 @@ const TEXFILE := {"conc": "piso", "planks": "piso", "wall": "parede", "ceil": "t
 const CAR_BASE := Vector3(-3.0, 0.0, -2.5)     # centro do Fiat Uno e do elevador animado
 const LIFT2_BASE := Vector3(3.2, 0.0, -2.5)    # elevador parado (vaga vazia)
 const CAR_FRONT := Vector2(-3.0, 1.1)         # onde o jogador fica, na frente do carro
-const BAT_SPOT := Vector3(0.38, 0.63, 1.7)   # lugar da bateria dentro do compartimento do motor
+const BAT_SPOT := Vector3(0.38, 0.62, 1.75)   # lugar da bateria dentro do compartimento do motor
 const CAR_TINT := Color.WHITE                  # cor extra do carro (Color.WHITE = cor original do modelo)
 
 # ---- onde o jogador se agacha para calibrar cada pneu (na ordem)
@@ -845,17 +845,17 @@ func _build_world() -> void:
 	bay_light.visible = false
 	car_root.add_child(bay_light)
 	box(Vector3(0, 0.6, 2.0), Vector3(1.3, 0.06, 1.3), flat(Color(0.04, 0.04, 0.05)), false, car_root)
-	box(Vector3(0, 0.67, 2.05), Vector3(0.7, 0.2, 0.72), flat(Color(0.14, 0.15, 0.17), 0.55, 0.6), false, car_root)
+	box(Vector3(0, 0.66, 2.05), Vector3(0.7, 0.14, 0.72), flat(Color(0.14, 0.15, 0.17), 0.55, 0.6), false, car_root)
 	box(Vector3(-0.38, 0.69, 1.7), Vector3(0.22, 0.12, 0.2), flat(Color(0.1, 0.1, 0.12), 0.5, 0.5), false, car_root)
 	_add_body_at(car_root, Vector3(0, 0.72, 0.0), Vector3(2.0, 1.44, 5.8))
 	# as baterias do carro ficam guardadas fora de vista (o capô ainda não abre)
 	car_bat = _make_prop("bateria_velha")
 	car_bat.position = BAT_SPOT
-	car_bat.scale = Vector3.ONE * 1.7
+	car_bat.scale = Vector3.ONE * 1.4
 	car_root.add_child(car_bat)
 	car_bat2 = _make_prop("bateria")
 	car_bat2.position = BAT_SPOT
-	car_bat2.scale = Vector3.ONE * 1.7
+	car_bat2.scale = Vector3.ONE * 1.4
 	car_bat2.visible = false
 	car_root.add_child(car_bat2)
 
@@ -1966,6 +1966,11 @@ func _physics_process(delta: float) -> void:
 		sfx(snd_creak, -10.0)
 		flick_until = t + 0.6
 		say("O corredor dos fundos é sempre frio...", 3.5)
+	# as baterias só aparecem com o capô aberto (fechado, elas atravessariam a chapa)
+	if hood_pivot != null:
+		var hood_open: bool = hood_pivot.rotation.x < -0.35
+		car_bat.visible = hood_open and not car_state["bateria"]
+		car_bat2.visible = hood_open and car_state["bateria"]
 	_anomalies()
 	_radio_tick()
 

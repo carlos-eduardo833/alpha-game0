@@ -152,3 +152,5 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 - Pequenas anomalias aleatorias a cada 40-70 s: lampada falhando, passos na chuva, batidas no portao, porta rangendo, luz piscando.
 --- VERSAO 47 ---
 - Radio: sem musica. Chiado de estatica + noticiario lido com a voz do sistema (portugues) e legenda perto do radio. Noticias em RADIO_NEWS no main.gd. radio.mp3/ogg em assets/audio ainda substitui tudo.
+--- VERSAO 48 ---
+- Bateria atravessava o capo fechado: agora as baterias so aparecem com o capo aberto (menores). Bloco do motor mais baixo.
