@@ -49,6 +49,12 @@ var cam: Camera3D
 var pitch := 0.0
 var paused := true
 var started := false
+var title_on := false            # tela de título (estilo Fears to Fathom)
+var intro_on := false            # aviso inicial (fones de ouvido)
+var title_t := 0.0
+var title_root: Control
+var intro_root: Control
+var ctl_label: Label
 var over := false
 var press_e := false
 var t := 0.0
@@ -159,7 +165,7 @@ func _ready() -> void:
 		radio_babble.append(_babble(5.0, 1000 + bi * 17))
 	_set_obj()
 	_render_chk()
-	_show_overlay("Turno da Madrugada: Km 42", "Parte 1: A rotina\n\nUma oficina antiga na beira da rodovia, cercada de mata fechada. Chove fino lá fora. O chefe não vai conseguir voltar, e você está sozinho no turno.\n\nW A S D: andar     Mouse: olhar     E: interagir     Shift: correr     F11: tela cheia     Esc: pausa\n\nElevador: aponte a mira para o motor do elevador e aperte E para subir ou descer o carro.", "Começar")
+	_show_intro()
 
 
 # ---------------------------------------------------------------- ambiente
@@ -1481,6 +1487,198 @@ func _build_hud() -> void:
 	ov_btn.add_theme_font_size_override("font_size", 22)
 	ov_btn.pressed.connect(_on_btn)
 	vb.add_child(ov_btn)
+	_build_title(root)
+
+
+func _build_title(root: Control) -> void:
+	# ---- tela de título: cena do jogo ao fundo (escurecida), título à esquerda, menu simples
+	title_root = Control.new()
+	title_root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	title_root.visible = false
+	root.add_child(title_root)
+	var shade := TextureRect.new()
+	var gt := GradientTexture2D.new()
+	var gr := Gradient.new()
+	gr.set_color(0, Color(0, 0, 0, 0.92))
+	gr.set_color(1, Color(0, 0, 0, 0.35))
+	gt.gradient = gr
+	gt.fill_from = Vector2(0, 0.5)
+	gt.fill_to = Vector2(1, 0.5)
+	shade.texture = gt
+	shade.stretch_mode = TextureRect.STRETCH_SCALE
+	shade.set_anchors_preset(Control.PRESET_FULL_RECT)
+	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	title_root.add_child(shade)
+	var vb := VBoxContainer.new()
+	vb.anchor_left = 0.07
+	vb.anchor_right = 0.55
+	vb.anchor_top = 0.0
+	vb.anchor_bottom = 1.0
+	vb.alignment = BoxContainer.ALIGNMENT_CENTER
+	vb.add_theme_constant_override("separation", 6)
+	title_root.add_child(vb)
+	var t1 := Label.new()
+	t1.text = "TURNO DA MADRUGADA"
+	t1.add_theme_font_size_override("font_size", 58)
+	t1.add_theme_color_override("font_color", Color(0.93, 0.91, 0.86))
+	t1.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.9))
+	t1.add_theme_constant_override("shadow_offset_x", 2)
+	t1.add_theme_constant_override("shadow_offset_y", 2)
+	vb.add_child(t1)
+	var t2 := Label.new()
+	t2.text = "KM 42"
+	t2.add_theme_font_size_override("font_size", 34)
+	t2.add_theme_color_override("font_color", Color(0.62, 0.6, 0.55))
+	vb.add_child(t2)
+	var t3 := Label.new()
+	t3.text = "Parte 1: A rotina"
+	t3.add_theme_font_size_override("font_size", 18)
+	t3.add_theme_color_override("font_color", Color(0.45, 0.44, 0.41))
+	vb.add_child(t3)
+	var sp := Control.new()
+	sp.custom_minimum_size = Vector2(0, 46)
+	vb.add_child(sp)
+	_menu_btn("Iniciar", vb, _title_start)
+	_menu_btn("Como jogar", vb, _title_help)
+	_menu_btn("Tela cheia (F11)", vb, _title_fullscreen)
+	_menu_btn("Sair", vb, _title_quit)
+	var ver := Label.new()
+	ver.text = "Um jogo de terror leve, em primeira pessoa"
+	ver.add_theme_font_size_override("font_size", 14)
+	ver.add_theme_color_override("font_color", Color(0.4, 0.39, 0.36))
+	ver.anchor_left = 0.07
+	ver.anchor_top = 1.0
+	ver.anchor_bottom = 1.0
+	ver.offset_top = -40
+	title_root.add_child(ver)
+	# ---- aviso inicial (fones de ouvido), preto, antes do título
+	intro_root = ColorRect.new()
+	(intro_root as ColorRect).color = Color(0, 0, 0, 1)
+	intro_root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	intro_root.visible = false
+	root.add_child(intro_root)
+	var il := Label.new()
+	il.text = "Este jogo contém tensão e sustos leves.\n\nRecomendamos jogar no escuro, com fones de ouvido."
+	il.add_theme_font_size_override("font_size", 24)
+	il.add_theme_color_override("font_color", Color(0.75, 0.73, 0.68))
+	il.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	il.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	il.set_anchors_preset(Control.PRESET_FULL_RECT)
+	il.modulate.a = 0.0
+	il.name = "IntroText"
+	intro_root.add_child(il)
+	# ---- dica de controles nos primeiros segundos de jogo
+	ctl_label = Label.new()
+	ctl_label.text = "W A S D: andar    Mouse: olhar    E: interagir    Shift: correr    Esc: pausa"
+	ctl_label.add_theme_font_size_override("font_size", 16)
+	ctl_label.add_theme_color_override("font_color", Color(0.7, 0.68, 0.62))
+	ctl_label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.9))
+	ctl_label.anchor_left = 0.0
+	ctl_label.anchor_right = 1.0
+	ctl_label.anchor_top = 1.0
+	ctl_label.anchor_bottom = 1.0
+	ctl_label.offset_top = -30
+	ctl_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	ctl_label.modulate.a = 0.0
+	ctl_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(ctl_label)
+
+
+func _menu_btn(txt: String, parent: Control, cb: Callable) -> void:
+	var b := Button.new()
+	b.text = txt
+	b.flat = true
+	b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	b.focus_mode = Control.FOCUS_NONE
+	b.add_theme_font_size_override("font_size", 26)
+	b.add_theme_color_override("font_color", Color(0.62, 0.6, 0.55))
+	b.add_theme_color_override("font_hover_color", Color(1, 1, 1))
+	b.add_theme_color_override("font_pressed_color", Color(1, 1, 1))
+	var e := StyleBoxEmpty.new()
+	for sn in ["normal", "hover", "pressed", "focus"]:
+		b.add_theme_stylebox_override(sn, e)
+	b.mouse_entered.connect(func(): b.text = "> " + txt)
+	b.mouse_exited.connect(func(): b.text = txt)
+	b.pressed.connect(cb)
+	parent.add_child(b)
+
+
+func _show_intro() -> void:
+	paused = true
+	title_on = false
+	intro_on = true
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	intro_root.visible = true
+	var il := intro_root.get_node("IntroText") as Label
+	var tw := create_tween()
+	tw.tween_interval(0.6)
+	tw.tween_property(il, "modulate:a", 1.0, 1.2)
+	tw.tween_interval(2.8)
+	tw.tween_property(il, "modulate:a", 0.0, 1.0)
+	tw.tween_callback(_end_intro)
+
+
+func _end_intro() -> void:
+	if not intro_on:
+		return
+	intro_on = false
+	intro_root.visible = false
+	_show_title()
+
+
+func _show_title() -> void:
+	title_on = true
+	title_t = 0.0
+	title_root.modulate.a = 0.0
+	title_root.visible = true
+	overlay.visible = false
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	create_tween().tween_property(title_root, "modulate:a", 1.0, 1.6)
+
+
+func _title_click() -> void:
+	sfx(snd_switch if snd_switch != null else snd_clack, -12.0)
+
+
+func _title_start() -> void:
+	_title_click()
+	title_on = false
+	title_root.visible = false
+	player.rotation.y = PI / 2.0
+	pitch = 0.0
+	cam.rotation.x = 0.0
+	ctl_label.modulate.a = 0.0
+	var ct := create_tween()
+	ct.tween_interval(3.0)
+	ct.tween_property(ctl_label, "modulate:a", 1.0, 1.0)
+	ct.tween_interval(9.0)
+	ct.tween_property(ctl_label, "modulate:a", 0.0, 1.5)
+	_on_btn()
+
+
+func _title_help() -> void:
+	_title_click()
+	title_on = false
+	title_root.visible = false
+	_show_overlay("Como jogar", "W A S D: andar\nMouse: olhar\nE: interagir (segure E nas ações longas)\nShift: correr\nCtrl/agachar: automático ao calibrar pneus\nF11: tela cheia\nEsc: pausa\n\nElevador: aponte a mira para o motor do elevador e aperte E.", "Voltar")
+	ov_btn.pressed.disconnect(_on_btn)
+	ov_btn.pressed.connect(_help_back, CONNECT_ONE_SHOT)
+
+
+func _help_back() -> void:
+	ov_btn.pressed.connect(_on_btn)
+	overlay.visible = false
+	_show_title()
+
+
+func _title_fullscreen() -> void:
+	_title_click()
+	var fs := DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
+	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED if fs else DisplayServer.WINDOW_MODE_FULLSCREEN)
+
+
+func _title_quit() -> void:
+	get_tree().quit()
 
 
 func _show_overlay(title: String, text: String, btn: String) -> void:
@@ -2232,6 +2430,9 @@ func _end_screen() -> void:
 
 # ---------------------------------------------------------------- entrada e loop
 func _unhandled_input(ev: InputEvent) -> void:
+	if intro_on and ((ev is InputEventKey and ev.pressed) or (ev is InputEventMouseButton and ev.pressed)):
+		_end_intro()
+		return
 	if ev is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED and not paused and not clip_in_hand:
 		player.rotation.y -= ev.relative.x * 0.0022
 		pitch = clampf(pitch - ev.relative.y * 0.0022, -1.4, 1.4)
@@ -2246,7 +2447,11 @@ func _unhandled_input(ev: InputEvent) -> void:
 			_pause()
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	if title_on and player != null and cam != null:
+		title_t += delta
+		player.rotation.y = PI / 2.0 + sin(title_t * 0.22) * 0.07
+		cam.rotation.x = -0.04 + sin(title_t * 0.31) * 0.012
 	if lift_carriage == null or car_root == null:
 		return
 	if lift_rest_y > 1.0e8:
