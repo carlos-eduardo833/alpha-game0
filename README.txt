@@ -180,3 +180,5 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 --- VERSAO 59 ---
 - Nova sequencia: ler ordem > subir o carro (ver embaixo) > descer > abrir capo > verificar nivel de oleo > funil e galao > completar oleo > multimetro (Larry na janela) > testar bateria > bateria nova > trocar > calibrador no compressor > 4 pneus > ronda > fechar capo.
 - Bateria velha agora e o mesmo modelo, escurecido. Radio movido para x=2,2 (longe do interruptor do portao). Espingarda 40% maior.
+--- VERSAO 60 ---
+- Portao com a chapa ondulada (material_corrugated_sheet_metal), ondas na horizontal (assets/textures/portao_chapa.jpg).
