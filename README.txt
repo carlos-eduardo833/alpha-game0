@@ -189,3 +189,5 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 --- VERSAO 63 ---
 - Caixa vermelha removida; lanterna 50% maior; prancheta vai para a mao ao ler a ordem de servico (volta para a bancada depois); curto-circuito toca sozinho (sem rangido/clack junto).
 - (v64) renomeei uma variavel do portao para evitar conflito de nome.
+--- VERSAO 65 ---
+- Painel fixo na frente do trilho do portao (ele passa por tras). Elevador sobe mais (LIFT_SCALE_Y). Arvores proximas das janelas do deposito e da recepcao. Caixa vermelha da bancada removida de verdade. Lanterna na frente da mesa. Larry colado no vidro (z -8,47).

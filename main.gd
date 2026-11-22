@@ -29,6 +29,7 @@ const CAR_TINT := Color.WHITE                  # cor extra do carro (Color.WHITE
 const TIRE_SPOTS := [Vector2(-1.45, -0.73), Vector2(-1.45, -4.27), Vector2(-4.55, -4.27), Vector2(-4.55, -0.73)]
 
 # ---- elevador animado
+const LIFT_SCALE_Y := 1.55                      # altura do elevador (maior = o carro sobe mais)
 const LIFT_SCALE := 1.3                        # tamanho do elevador em relação ao modelo original
 const LIFT_PAD_CENTER := Vector3(1.195, 0.02, -1.90)   # centro das plataformas no modelo original
 const LIFT_UP_START := 9.5                     # segundo da animação "up" em que o carro começa a subir
@@ -40,7 +41,7 @@ const WIN_Y0 := 1.2                            # parte de baixo das janelas
 const WIN_Y1 := 2.5                            # parte de cima das janelas
 const WIN_HALF := 1.2                          # metade da largura das janelas
 const FOREST_POS := Vector3(0.0, -0.5, -25.5)  # onde fica a floresta (atrás do fundo da oficina)
-const LARRY_SPOTS := [Vector3(5.3, -0.6, -8.55), Vector3(-4.7, -0.6, -8.55)]   # só a cabeça aparece na janela
+const LARRY_SPOTS := [Vector3(5.3, -0.6, -8.47), Vector3(-4.7, -0.6, -8.47)]   # só a cabeça aparece na janela
 const LARRY_FIRST := 25.0                      # segundos até a primeira aparição
 
 var player: CharacterBody3D
@@ -862,6 +863,8 @@ func _build_world() -> void:
 		gate_mat = gate_m
 	gate = box(Vector3(0, 5.9, 8.35), Vector3(6, 3.2, 0.12), gate_mat, false)
 	box(Vector3(0, -1.58, 0), Vector3(6, 0.08, 0.16), flat(Color(0.2, 0.2, 0.22)), false, gate)   # barra de baixo
+	# painel fixo na frente do trilho do portão: ele sobe/desce "por trás" dele, sem aparecer saindo do teto
+	box(Vector3(0, 3.62, 8.2), Vector3(6.3, 0.95, 0.1), mat("wall", Color(0.8, 0.8, 0.84), 4.0), false)
 	var btn := _baked("botao")
 	if btn != null:
 		btn.position = Vector3(4.5, 1.18, 8.375)
@@ -911,7 +914,7 @@ func _build_world() -> void:
 	# ---- elevador com animação (sobe e desce o carro)
 	var lift := _baked("elevador_animado")
 	if lift != null:
-		var lift_basis := Basis(Vector3.UP, deg_to_rad(-90.0)) * Basis.from_scale(Vector3.ONE * LIFT_SCALE)
+		var lift_basis := Basis(Vector3.UP, deg_to_rad(-90.0)) * Basis.from_scale(Vector3(LIFT_SCALE, LIFT_SCALE_Y, LIFT_SCALE))
 		lift.transform = Transform3D(lift_basis, CAR_BASE + lift_basis * (-LIFT_PAD_CENTER))
 		add_child(lift)
 		var aps := lift.find_children("*", "AnimationPlayer", true, false)
@@ -991,7 +994,6 @@ func _build_world() -> void:
 	multi.position = Vector3(-4.7, 0.9, -7.8)
 	multi.scale = Vector3.ONE * 1.8
 	add_child(multi)
-	box(Vector3(-5.3, 0.95, -7.9), Vector3(0.4, 0.1, 0.15), flat(Color(0.6, 0.12, 0.12)), false)
 	for cz in [5.05, 6.7]:
 		var cl := _baked("armario")
 		if cl != null:
@@ -1067,8 +1069,8 @@ func _build_world() -> void:
 	_lying("chave_ajustavel", Vector3(2.15, 0.9, -7.7), 20.0, 0.016)
 	_lying("chave_fenda", Vector3(3.1, 0.9, -7.68), -35.0, 0.015)
 	_lying("philips", Vector3(3.3, 0.9, -7.8), 70.0, 0.017)
-	_lying("martelo", Vector3(-5.1, 0.9, -7.55), 8.0, 0.0, true)
-	_lying("lanterna", Vector3(-5.2, 0.9, -8.1), -15.0, 0.036, true)
+	_lying("martelo", Vector3(-5.15, 0.9, -8.1), 8.0, 0.0, true)
+	_lying("lanterna", Vector3(-5.1, 0.9, -7.5), -12.0, 0.036, true)
 	# morsa presa na quina da bancada (a manivela fica para fora da borda)
 	var vice := _baked("morsa")
 	if vice != null:
@@ -1149,6 +1151,20 @@ func _build_world() -> void:
 				add_child(fl2)
 				_tint(fl2, Color(0.30, 0.36, 0.52))
 				_set_layers(fl2, 2)
+	# árvores bem perto das janelas do depósito e da recepção (as cópias da mata ficam longe delas)
+	var wtrees := Node3D.new()
+	add_child(wtrees)
+	var tr_trunk := flat(Color(0.07, 0.06, 0.06), 0.9)
+	var tr_leaf := flat(Color(0.06, 0.09, 0.09), 0.95)
+	for tpos in [[-12.0, -6.5, 1.0], [-10.2, -8.0, 1.2], [-8.3, -6.8, 0.9], [-11.0, -10.0, 1.3], [-9.0, -9.5, 1.1], [-13.0, -8.5, 1.0],
+			[12.0, -6.5, 1.0], [10.2, -8.0, 1.2], [8.3, -6.8, 0.9], [11.0, -10.0, 1.3], [9.0, -9.5, 1.1], [13.0, -8.5, 1.0]]:
+		var tx: float = tpos[0]
+		var tz: float = tpos[1]
+		var tk: float = tpos[2]
+		cyl(Vector3(tx, 1.6 * tk, tz), 0.16 * tk, 0.24 * tk, 3.2 * tk, tr_trunk, Vector3.ZERO, wtrees)
+		cyl(Vector3(tx, 3.6 * tk, tz), 0.0, 1.3 * tk, 3.0 * tk, tr_leaf, Vector3.ZERO, wtrees)
+		cyl(Vector3(tx, 5.0 * tk, tz), 0.0, 0.9 * tk, 2.2 * tk, tr_leaf, Vector3.ZERO, wtrees)
+	_set_layers(wtrees, 2)
 	var moon := DirectionalLight3D.new()
 	moon.light_color = Color(0.55, 0.65, 0.95)
 	moon.light_energy = 0.45
