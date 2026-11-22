@@ -186,3 +186,5 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 - Som do portao fechando (portao_fechando.ogg, silencio inicial cortado). O portao agora desce em 7 s para acompanhar o som.
 --- VERSAO 62 ---
 - Radio movido para a parede leste da garagem (x 6,45 / z -4,5), a parede vazia ao lado da porta da recepcao.
+--- VERSAO 63 ---
+- Caixa vermelha removida; lanterna 50% maior; prancheta vai para a mao ao ler a ordem de servico (volta para a bancada depois); curto-circuito toca sozinho (sem rangido/clack junto).

@@ -82,6 +82,8 @@ var anim_up := ""
 var anim_down := ""
 var new_bat: Node3D
 var clip: Node3D
+var pp_sheet_n: Node3D
+var clip_in_hand := false
 var multi: Node3D
 var galao: Node3D
 var funil: Node3D
@@ -645,6 +647,8 @@ func _lying(key: String, pos: Vector3, yaw: float, lift: float, along_x: bool = 
 	h.position = pos + Vector3(0, lift, 0)
 	h.rotation_degrees.y = yaw
 	add_child(h)
+	if key == "lanterna":
+		n.scale = Vector3.ONE * 1.5
 	if along_x:
 		n.rotation_degrees.z = -90.0
 		n.position = Vector3(-0.15, 0.0, 0.0)
@@ -982,6 +986,7 @@ func _build_world() -> void:
 	pp_sheet.position = Vector3(-5.7, 0.9 + 0.046, -7.8)
 	pp_sheet.rotation_degrees.y = 20.0
 	add_child(pp_sheet)
+	pp_sheet_n = pp_sheet
 	multi = _make_prop("multi")
 	multi.position = Vector3(-4.7, 0.9, -7.8)
 	multi.scale = Vector3.ONE * 1.8
@@ -1031,12 +1036,8 @@ func _build_world() -> void:
 		add_child(comp)
 		solid_box(Vector3(0.6, 0.56, -8.14), Vector3(1.6, 1.12, 0.5))
 
-	# caixa de ferramentas (guarda as chaves), encostada na parede dos fundos
-	var chest := _baked("caixa_ferramentas")
+	# mesa de ferramentas (sem a caixa vermelha)
 	_table(Vector3(2.7, 0.0, -8.0), Vector3(1.5, 0.9, 0.8))
-	if chest != null:
-		chest.position = Vector3(2.7, 0.9, -8.05)
-		add_child(chest)
 
 	# quadro de ferramentas (pegboard) na parede, acima da caixa
 	var peg := box(Vector3(2.7, 2.45, -8.38), Vector3(1.7, 0.9, 0.04), flat(Color(0.33, 0.25, 0.18)), false)
@@ -1067,7 +1068,7 @@ func _build_world() -> void:
 	_lying("chave_fenda", Vector3(3.1, 0.9, -7.68), -35.0, 0.015)
 	_lying("philips", Vector3(3.3, 0.9, -7.8), 70.0, 0.017)
 	_lying("martelo", Vector3(-5.1, 0.9, -7.55), 8.0, 0.0, true)
-	_lying("lanterna", Vector3(-5.2, 0.9, -8.1), -15.0, 0.024, true)
+	_lying("lanterna", Vector3(-5.2, 0.9, -8.1), -15.0, 0.036, true)
 	# morsa presa na quina da bancada (a manivela fica para fora da borda)
 	var vice := _baked("morsa")
 	if vice != null:
@@ -1745,7 +1746,45 @@ func _s0() -> void:
 		create_tween().tween_property(gate, "position:y", 1.6, 2.0)
 
 
+func _hold_clip() -> void:
+	# pega a prancheta (com a folha) da bancada e segura na mão virada para a câmera
+	for ch in held.get_children():
+		ch.queue_free()
+	var piv := Node3D.new()
+	var c2 := clip.duplicate() as Node3D
+	c2.position = Vector3.ZERO
+	c2.rotation_degrees = Vector3.ZERO
+	piv.add_child(c2)
+	if pp_sheet_n != null:
+		var p2 := pp_sheet_n.duplicate() as Node3D
+		p2.position = Vector3(0, 0.046, 0)
+		p2.rotation_degrees = Vector3.ZERO
+		piv.add_child(p2)
+	piv.rotation_degrees = Vector3(72, 0, 0)
+	piv.scale = Vector3.ONE * 1.3
+	held.add_child(piv)
+	held.visible = true
+	clip.visible = false
+	if pp_sheet_n != null:
+		pp_sheet_n.visible = false
+	clip_in_hand = true
+	get_tree().create_timer(11.0).timeout.connect(_put_clip_back)
+
+
+func _put_clip_back() -> void:
+	if not clip_in_hand:
+		return
+	clip_in_hand = false
+	for ch in held.get_children():
+		ch.queue_free()
+	held.visible = false
+	clip.visible = true
+	if pp_sheet_n != null:
+		pp_sheet_n.visible = true
+
+
 func _s1() -> void:
+	_hold_clip()
 	say("Ordem de serviço, Cadillac Eldorado: 1) Ver embaixo no elevador   2) Completar o óleo   3) Verificar a bateria   4) Calibrar os pneus   5) Ronda: checar as travas das janelas", 10.0)
 
 
@@ -1822,11 +1861,12 @@ func _larry_appear() -> void:
 	larry_state = 1
 	larry_born = t
 	larry_until = t + 8.0
-	sfx(snd_creak, -2.0, 0.7)
-	sfx(snd_clack, -2.0, 0.6)
 	flick_until = t + 0.5
 	if snd_short != null:
 		sfx3(snd_short, Vector3(0.0, 3.0, 0.0), -3.0)
+	else:
+		sfx(snd_creak, -2.0, 0.7)
+		sfx(snd_clack, -2.0, 0.6)
 	var base_fov := 75.0
 	var zt := create_tween()
 	zt.tween_property(cam, "fov", base_fov * 0.55, 0.18).set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_OUT)
@@ -2006,6 +2046,7 @@ func _larry_duck(seen: bool) -> void:
 
 
 func _s5() -> void:
+	_put_clip_back()
 	multi.visible = false
 	_hold_item("multi")
 	_larry_appear()
@@ -2189,7 +2230,6 @@ func _physics_process(delta: float) -> void:
 	var px := player.global_position.x
 	if not in_dep and px < -8.0:
 		in_dep = true
-		sfx(snd_creak, -10.0)
 		flick_until = t + 0.6
 		if snd_short != null:
 			sfx3(snd_short, Vector3(-9.0, 3.0, 0.0), -3.0)
