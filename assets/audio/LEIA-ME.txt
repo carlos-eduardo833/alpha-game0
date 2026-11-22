@@ -12,3 +12,8 @@ CHUVA
 PASSOS
 - O jogo usa passo1.ogg ... passo6.ogg (passos gravados, sorteados a cada passada, tambem nos passos de fora na chuva).
   Para trocar, substitua esses arquivos (ou apague-os para voltar ao passo gerado por codigo).
+
+OUTROS SONS
+- interruptor.ogg: clique do botao do portao. curto_circuito.ogg: lampadas falhando.
+- ambiente.ogg: som ambiente de fundo em loop, bem baixo. O volume fica em AMBIENTE_DB no topo do main.gd
+  (-24 = quase inaudivel; -12 = mais presente; 0 = volume original do arquivo).

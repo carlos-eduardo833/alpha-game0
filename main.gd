@@ -3,6 +3,7 @@ extends Node3D
 ## Modelos 3D (assets/models) e texturas (assets/textures) vem dos arquivos enviados; sons e itens simples sao gerados por codigo.
 
 const SR := 22050
+const AMBIENTE_DB := -24.0                    # volume do som ambiente de fundo (quanto mais negativo, mais baixo)
 const TYPE_CPS := 32.0                       # velocidade da digitação das legendas (letras por segundo)
 const QUALIDADE_ALTA := true                   # true = PC bom (sombras e imagem mais nítida); false = notebook fraco
 const RESOLUCAO := 432.0                      # linhas da imagem, estilo VHS/Fears to Fathom (240 = bem pixelado, 360 = mais nítido, 1080 = sem efeito)
@@ -109,6 +110,8 @@ var snd_clack: AudioStream
 var snd_step: AudioStream
 var snd_steps: Array = []        # passos gravados (assets/audio/passo1..6.ogg)
 var snd_gate: AudioStream
+var snd_switch: AudioStream     # clique do interruptor do portão
+var snd_short: AudioStream      # curto-circuito (lâmpadas falhando)
 var snd_gate2: AudioStream
 var snd_chime1: AudioStream
 var snd_chime2: AudioStream
@@ -816,7 +819,7 @@ func _build_world() -> void:
 		box(Vector3(0, -1.5 + i * 0.4, 0), Vector3(6, 0.04, 0.14), flat(Color(0.2, 0.2, 0.22)), false, gate)
 	var btn := _baked("botao")
 	if btn != null:
-		btn.position = Vector3(4.5, 1.23, 8.36)
+		btn.position = Vector3(4.5, 1.18, 8.375)
 		add_child(btn)
 	else:
 		box(Vector3(4.5, 1.3, 8.38), Vector3(0.5, 0.5, 0.05), flat(Color(0.1, 0.1, 0.1)), false)
@@ -1581,6 +1584,26 @@ func _build_audio() -> void:
 		if sp != "":
 			snd_steps.append(load(sp))
 	snd_gate = _noise(2.0, 0.6, false, 0.05, true)
+	var pw := _find_asset("res://assets/audio/", "interruptor", [".ogg", ".wav", ".mp3"])
+	if pw != "":
+		snd_switch = load(pw)
+	var pc := _find_asset("res://assets/audio/", "curto_circuito", [".ogg", ".wav", ".mp3"])
+	if pc != "":
+		snd_short = load(pc)
+	# som ambiente de fundo, bem baixo
+	var pa := _find_asset("res://assets/audio/", "ambiente", [".ogg", ".wav", ".mp3"])
+	if pa != "":
+		var amb = load(pa)
+		if amb is AudioStreamOggVorbis:
+			(amb as AudioStreamOggVorbis).loop = true
+		elif amb is AudioStreamMP3:
+			(amb as AudioStreamMP3).loop = true
+		if amb is AudioStream:
+			var ambp := AudioStreamPlayer.new()
+			ambp.stream = amb
+			ambp.volume_db = AMBIENTE_DB
+			add_child(ambp)
+			ambp.play()
 	snd_gate2 = _tone(60.0, 2.0, 0.3, -1.0, 1)
 	snd_hiss = _noise(1.0, 0.5, true, 0.3, true)
 	snd_lift = _tone(70.0, 6.5, 0.3, 85.0, 1)
@@ -1631,6 +1654,7 @@ func _build_steps() -> void:
 
 
 func _s0() -> void:
+	sfx3(snd_switch if snd_switch != null else snd_clack, Vector3(4.5, 1.3, 8.3), 2.0)
 	sfx(snd_gate, -4.0)
 	sfx(snd_gate2, -8.0)
 	create_tween().tween_property(gate, "position:y", 1.6, 2.0)
@@ -1742,7 +1766,11 @@ func _anomalies() -> void:
 		0:   # uma lâmpada falha por alguns segundos
 			anom_lamp = randi() % lamps.size()
 			anom_lamp_until = t + randf_range(1.5, 3.0)
-			sfx(snd_clack, -16.0, 0.5)
+			var fl: OmniLight3D = lamps[anom_lamp][0]
+			if snd_short != null:
+				sfx3(snd_short, fl.global_position, -4.0)
+			else:
+				sfx(snd_clack, -16.0, 0.5)
 		1:   # passos do lado de fora, na chuva
 			var side := -1.0 if randf() > 0.5 else 1.0
 			var tw := create_tween()
@@ -1759,7 +1787,10 @@ func _anomalies() -> void:
 			sfx3(snd_creak, Vector3(rx, 1.5, 0.0), -3.0, 0.6)
 		4:   # a luz pisca e o rádio engasga
 			flick_until = t + 0.5
-			sfx(snd_hiss, -18.0, 0.6)
+			if snd_short != null:
+				sfx3(snd_short, Vector3(0, 3.0, 0), -10.0, 1.15)
+			else:
+				sfx(snd_hiss, -18.0, 0.6)
 			say("...", 1.5)
 
 

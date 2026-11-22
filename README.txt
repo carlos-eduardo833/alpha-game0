@@ -166,3 +166,6 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 - Passos: 6 passos gravados (footstep.m4a cortado em passo1..6.ogg), sorteados a cada passada.
 --- VERSAO 54 ---
 - Corrida: passos mais rapidos, mais altos e mais agudos (secos), balanco da camera mais rapido.
+--- VERSAO 55 ---
+- Botao do portao trocado pelo interruptor (light_switch_and_bulb, so o interruptor). Clique ao fechar o portao.
+- Curto-circuito quando as lampadas falham. Som ambiente de fundo (AMBIENTE_DB = -24).
