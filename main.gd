@@ -131,6 +131,8 @@ var snd_lift_up: AudioStream      # elevador_sobe.ogg (opcional)
 var snd_lift_down: AudioStream    # elevador_desce.ogg (opcional)
 var snd_hood_open: AudioStream    # capo_abrindo.ogg (opcional)
 var snd_hood_close: AudioStream   # capo_fechando.ogg (opcional)
+var snd_pour: AudioStream         # óleo caindo (gerado por código, enquanto não houver um arquivo)
+var hold_pl: AudioStreamPlayer
 var snd_comp_off: AudioStream    # compressor_desliga.ogg (opcional)
 var snd_lock: AudioStream         # trava_janela.ogg (opcional)
 var radio_bus := "Master"
@@ -1963,6 +1965,9 @@ func _build_audio() -> void:
 	snd_hood_close = _opt_snd("capo_fechando")
 	snd_lock = _opt_snd("trava_janela")
 	snd_comp_off = _opt_snd("compressor_desliga")
+	snd_pour = _opt_snd("oleo_caindo")
+	if snd_pour == null:
+		snd_pour = _pour(4.0)
 	snd_chime1 = _tone(1320.0, 1.4, 0.3)
 	snd_chime2 = _tone(990.0, 1.6, 0.3)
 	var rain := AudioStreamPlayer.new()
@@ -1997,7 +2002,7 @@ func _build_steps() -> void:
 		{"o": "Abra o capô do carro", "at": CAR_FRONT, "r": 1.9, "lift": true, "h": "[E] Abrir capô", "hold": 0.0, "go": _s2},
 		{"o": "Verifique o nível de óleo (vareta do motor)", "at": CAR_FRONT, "r": 1.9, "lift": true, "h": "[E] Verificar nível de óleo", "hold": 0.0, "go": _o1},
 		{"o": "Pegue o funil e o galão de óleo no estoque (depósito, porta à esquerda da garagem)", "at": Vector2(-11.3, -2.8), "r": 1.8, "h": "[E] Pegar funil e galão", "hold": 0.0, "go": _s3},
-		{"o": "Complete o óleo (segure E no carro)", "at": CAR_FRONT, "r": 1.9, "lift": true, "h": "Segure [E] para completar o óleo", "hold": 4.0, "go": _s4},
+		{"o": "Complete o óleo (segure E no carro)", "at": CAR_FRONT, "r": 1.9, "lift": true, "h": "Segure [E] para completar o óleo", "hold": 4.0, "pour": true, "go": _s4},
 		{"o": "Pegue o multímetro na bancada", "at": Vector2(-4.7, -7.0), "r": 1.7, "h": "[E] Pegar multímetro", "hold": 0.0, "go": _s5},
 		{"o": "Teste a bateria do carro com o multímetro", "at": CAR_FRONT, "r": 1.9, "lift": true, "h": "[E] Testar bateria", "hold": 0.0, "go": _s6},
 		{"o": "Vá ao depósito (porta à esquerda da garagem) e pegue a bateria nova", "at": Vector2(-11.3, 0.0), "r": 2.3, "h": "[E] Pegar bateria nova", "hold": 0.0, "go": _s7},
@@ -2123,7 +2128,6 @@ func _s4() -> void:
 	held.visible = false
 	car_state["oleo"] = true
 	_render_chk()
-	sfx(snd_hiss, -10.0, 0.6)
 	say("Óleo completado.", 2.5)
 
 
@@ -2175,9 +2179,10 @@ func _anomalies() -> void:
 	if over or step < 1 or t < anom_next or larry_state != 0:
 		return
 	anom_next = t + randf_range(40.0, 70.0)
-	var ev := randi() % 5
+	var evs := [0, 1, 2, 4]
+	var ev: int = evs[randi() % evs.size()]
 	if ev == anom_last:
-		ev = (ev + 1) % 5
+		ev = evs[(evs.find(ev) + 1) % evs.size()]
 	anom_last = ev
 	match ev:
 		0:   # uma lâmpada falha por alguns segundos
@@ -2199,9 +2204,6 @@ func _anomalies() -> void:
 			for i in 3:
 				get_tree().create_timer(0.5 * i).timeout.connect(sfx3.bind(snd_clack, Vector3(0, 2.0, 9.6), -2.0, 0.4))
 			say("...Alguém bateu no portão?", 3.0)
-		3:   # a porta da sala ao lado range sozinha
-			var rx := 7.0 if randf() > 0.5 else -7.0
-			sfx3(snd_creak, Vector3(rx, 1.5, 0.0), -3.0, 0.6)
 		4:   # a luz pisca e o rádio engasga
 			flick_until = t + 0.5
 			if snd_short != null:
@@ -2209,6 +2211,55 @@ func _anomalies() -> void:
 			else:
 				sfx(snd_hiss, -18.0, 0.6)
 			say("...", 1.5)
+
+
+func _pour(dur: float) -> AudioStreamWAV:
+	# líquido caindo num recipiente: ruído filtrado com "glugs" e bolhas, o som vai ficando mais cheio
+	var n := int(SR * dur)
+	var a := PackedFloat32Array()
+	a.resize(n)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 99
+	var y1 := 0.0
+	var y2 := 0.0
+	var bub: Array = []
+	var bt := 0.1
+	while bt < dur - 0.3:
+		bub.append([bt, rng.randf_range(420.0, 1100.0), rng.randf_range(0.18, 0.4)])
+		bt += rng.randf_range(0.07, 0.24)
+	for i in n:
+		var u := float(i) / float(n)
+		var tt := float(i) / float(SR)
+		var x := rng.randf() * 2.0 - 1.0
+		y1 += (x - y1) * lerpf(0.10, 0.28, u)
+		y2 += (x - y2) * 0.02
+		var band := y1 - y2
+		var glug := 0.55 + 0.30 * sin(TAU * 5.5 * tt + 2.0 * sin(TAU * 0.9 * tt)) + 0.15 * sin(TAU * 11.0 * tt)
+		a[i] = band * glug * 1.3
+	for b in bub:
+		var st: int = int(float(b[0]) * SR)
+		var f0: float = b[1]
+		var amp: float = b[2]
+		var ln := int(0.06 * SR)
+		for k in ln:
+			var idx := st + k
+			if idx >= n:
+				break
+			var q := float(k) / float(ln)
+			var f := f0 * (1.0 + 0.8 * q)
+			a[idx] += sin(TAU * f * float(k) / float(SR)) * amp * pow(1.0 - q, 2.0)
+	for i in n:
+		var u2 := float(i) / float(n)
+		var env := minf(1.0, u2 / 0.04) * minf(1.0, (1.0 - u2) / 0.12)
+		a[i] = clampf(a[i] * env * 0.7, -1.0, 1.0)
+	return _wav(_bytes(a), false)
+
+
+func _stop_pour() -> void:
+	if hold_pl != null and is_instance_valid(hold_pl):
+		hold_pl.stop()
+		hold_pl.queue_free()
+	hold_pl = null
 
 
 func _babble(dur: float, seed_: int) -> AudioStreamWAV:
@@ -2567,9 +2618,17 @@ func _physics_process(delta: float) -> void:
 					prog += delta / s["hold"]
 					bar.visible = true
 					bar.value = prog
+					if s.get("pour", false) and hold_pl == null and snd_pour != null:
+						hold_pl = AudioStreamPlayer.new()
+						hold_pl.stream = snd_pour
+						hold_pl.volume_db = -2.0
+						add_child(hold_pl)
+						hold_pl.play()
+						hold_pl.finished.connect(hold_pl.queue_free)
 					if prog >= 1.0:
 						prog = 0.0
 						bar.visible = false
+						hold_pl = null
 						_advance()
 				else:
 					prog = 0.0
@@ -2585,6 +2644,8 @@ func _physics_process(delta: float) -> void:
 			h = "[E] Ler quadro"
 			if press_e:
 				say("Quadro: Proibido abandonar a oficina durante o turno solo.", 5.0)
+	if hold_pl != null and prog <= 0.0:
+		_stop_pour()
 	if not step_near and not over and lift_anim != null and _aim_at(lift_switch_3d, lift_switch_r, 2.8):
 		if lift_state == 0:
 			h = "[E] Subir o carro"

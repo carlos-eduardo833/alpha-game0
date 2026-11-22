@@ -208,3 +208,5 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 - Portao com ondulacao 3D de verdade (malha gerada por codigo, ondas de 9,5 cm e 3 cm de relevo, alinhadas com a textura).
 --- VERSAO 74 ---
 - Nova tela de inicio no estilo Fears to Fathom: aviso preto (tensao leve / fones de ouvido, qualquer tecla pula), depois titulo a esquerda sobre a cena do jogo escurecida com a camera balancando devagar, menu simples (Iniciar, Como jogar, Tela cheia, Sair). Dica de controles aparece nos primeiros segundos do jogo.
+--- VERSAO 75 ---
+- Oleo: som de liquido caindo (gerado por codigo, toca enquanto segura E; para se soltar). Para trocar, coloque assets/audio/oleo_caindo.ogg. Anomalia da porta que range sozinha removida.
