@@ -202,3 +202,5 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 - (v70) corrige a v69, que saiu com o main.gd corrompido por engano; conteudo igual ao descrito acima.
 --- VERSAO 71 ---
 - Radio movido para a bancada da prancheta (fundo, ao lado). Prancheta na mao dura 7 s e o jogador fica travado (sem andar nem olhar) ate ela voltar para a mesa.
+--- VERSAO 72 ---
+- Compressor desliga sozinho (compressor_desliga.ogg, 3 s) 1,6 s depois do 4o pneu calibrado, com uma fala de rotina.

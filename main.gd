@@ -125,6 +125,7 @@ var snd_lift_up: AudioStream      # elevador_sobe.ogg (opcional)
 var snd_lift_down: AudioStream    # elevador_desce.ogg (opcional)
 var snd_hood_open: AudioStream    # capo_abrindo.ogg (opcional)
 var snd_hood_close: AudioStream   # capo_fechando.ogg (opcional)
+var snd_comp_off: AudioStream    # compressor_desliga.ogg (opcional)
 var snd_lock: AudioStream         # trava_janela.ogg (opcional)
 var radio_bus := "Master"
 var radio_file := false          # true se o jogador colocou radio.mp3/ogg (aí não há noticiário)
@@ -1729,6 +1730,7 @@ func _build_audio() -> void:
 	snd_hood_open = _opt_snd("capo_abrindo")
 	snd_hood_close = _opt_snd("capo_fechando")
 	snd_lock = _opt_snd("trava_janela")
+	snd_comp_off = _opt_snd("compressor_desliga")
 	snd_chime1 = _tone(1320.0, 1.4, 0.3)
 	snd_chime2 = _tone(990.0, 1.6, 0.3)
 	var rain := AudioStreamPlayer.new()
@@ -2120,6 +2122,13 @@ func _s9() -> void:
 	_render_chk()
 	sfx(snd_hiss, -8.0, 1.4)
 	say("Pneus calibrados.", 2.5)
+	if snd_comp_off != null:
+		# o compressor desliga sozinho um instante depois: confirma que funcionou (e dá um susto de rotina)
+		get_tree().create_timer(1.6).timeout.connect(func():
+			sfx3(snd_comp_off, Vector3(0.6, 0.7, -8.14), 0.0)
+			get_tree().create_timer(2.8).timeout.connect(func():
+				if not over:
+					say("...Só o compressor desligando. Normal.", 3.0)))
 
 
 func _s10() -> void:

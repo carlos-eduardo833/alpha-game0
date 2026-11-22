@@ -19,3 +19,4 @@ OUTROS SONS
   (-24 = quase inaudivel; -12 = mais presente; 0 = volume original do arquivo).
 - portao_fechando.ogg: som do portao fechando (assets/audio).
 - capo_abrindo.ogg, capo_fechando.ogg, trava_janela.ogg, elevador_sobe.ogg, elevador_desce.ogg: sons do capo, da trava das janelas e do elevador.
+- compressor_desliga.ogg: compressor desligando, apos calibrar os pneus.
