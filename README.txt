@@ -143,3 +143,5 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 - Corrigido erro de variaveis duplicadas (dark/wood) no quadro de ferramentas.
 --- VERSAO 43 ---
 - Capo do Cadillac abre e fecha (pivo na base do para-brisa, 62 graus, com rangido). Compartimento do motor basico (bloco, bateria velha) visivel ao abrir. Parte interna do capo escura.
+--- VERSAO 44 ---
+- Corrigido: capo aparecia preto por fora (material interno dupla-face). Agora fora = cor do carro, dentro = escuro.
