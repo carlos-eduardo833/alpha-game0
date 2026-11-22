@@ -627,6 +627,35 @@ func _wall_h(x0: float, x1: float, z: float, holes: Array, wm: Material) -> void
 		box(Vector3((cur + x1) / 2.0, 2.0, z), Vector3(x1 - cur, 4.0, 0.2), wm)
 
 
+func _wall_prop(key: String, pos: Vector3, yaw: float) -> void:
+	var n := _baked(key)
+	if n == null:
+		return
+	n.position = pos
+	n.rotation_degrees.y = yaw
+	add_child(n)
+
+
+func _lying(key: String, pos: Vector3, yaw: float, lift: float, along_x: bool = false) -> void:
+	# ferramenta deitada sobre uma mesa; "lift" = metade da espessura para não afundar
+	var n := _baked(key)
+	if n == null:
+		return
+	var h := Node3D.new()
+	h.position = pos + Vector3(0, lift, 0)
+	h.rotation_degrees.y = yaw
+	add_child(h)
+	if along_x:
+		n.rotation_degrees.z = -90.0
+		n.position = Vector3(-0.15, 0.0, 0.0)
+		if key == "martelo":
+			n.position.y = 0.053
+	else:
+		n.rotation_degrees.x = -90.0
+		n.position = Vector3(0, 0, 0.12)
+	h.add_child(n)
+
+
 func _baked(base: String) -> Node3D:
 	# carrega assets/models/<base>.glb (já no tamanho certo, base no chão, frente para +Z)
 	var path := _find_asset(MODEL_DIR, base, [".glb", ".gltf"])
@@ -941,7 +970,7 @@ func _build_world() -> void:
 	pp_sheet.rotation_degrees.y = 20.0
 	add_child(pp_sheet)
 	multi = _make_prop("multi")
-	multi.position = Vector3(-4.3, 0.9, -7.8)
+	multi.position = Vector3(-4.7, 0.9, -7.8)
 	multi.scale = Vector3.ONE * 1.8
 	add_child(multi)
 	box(Vector3(-5.3, 0.95, -7.9), Vector3(0.4, 0.1, 0.15), flat(Color(0.6, 0.12, 0.12)), false)
@@ -999,30 +1028,54 @@ func _build_world() -> void:
 	# quadro de ferramentas (pegboard) na parede, acima da caixa
 	var peg := box(Vector3(2.7, 2.45, -8.38), Vector3(1.7, 0.9, 0.04), flat(Color(0.33, 0.25, 0.18)), false)
 	var steel := flat(Color(0.5, 0.52, 0.56), 0.5, 0.6)
-	var peg_dark := flat(Color(0.16, 0.16, 0.18), 0.6, 0.5)
-	var peg_wood := flat(Color(0.4, 0.26, 0.14))
-	var yellow := flat(Color(0.75, 0.6, 0.12))
 	var redh := flat(Color(0.6, 0.1, 0.08))
-	# chaves de boca (3 tamanhos)
-	for i in 3:
-		var wx := -0.7 + i * 0.16
-		var wl := 0.5 - i * 0.07
-		box(Vector3(wx, 0.05, 0.035), Vector3(0.035, wl, 0.015), steel, false, peg)
-		box(Vector3(wx, 0.05 + wl / 2.0, 0.035), Vector3(0.09, 0.07, 0.015), steel, false, peg)
-	# martelo
-	box(Vector3(-0.15, 0.0, 0.035), Vector3(0.04, 0.5, 0.025), peg_wood, false, peg)
-	box(Vector3(-0.15, 0.27, 0.035), Vector3(0.16, 0.07, 0.03), peg_dark, false, peg)
-	# chaves de fenda
-	for i in 3:
-		var sx := 0.05 + i * 0.1
-		box(Vector3(sx, 0.08, 0.035), Vector3(0.015, 0.32, 0.012), steel, false, peg)
-		box(Vector3(sx, -0.14, 0.04), Vector3(0.04, 0.14, 0.03), yellow if i != 1 else redh, false, peg)
+	# ferramentas reais penduradas no quadro (modelos baixados)
+	var hang := [
+		["alicate_corte", -0.68, 0.0], ["chave_ajustavel", -0.45, 0.0], ["martelo", -0.25, 0.0],
+		["philips", -0.07, 0.0], ["chave_fenda", 0.08, 0.0], ["chave_fenda2", 0.2, 0.0], ["chave_fenda3", 0.3, 0.0],
+	]
+	for hd in hang:
+		var tool_m := _baked(hd[0])
+		if tool_m != null:
+			tool_m.position = Vector3(hd[1], 0.0, 0.11 if hd[0] == "martelo" else 0.045)
+			peg.add_child(tool_m)
+			# o modelo tem a base em y=0: sobe/desce para ficar no meio do quadro
+			var hh := 0.8 if hd[0] == "alicate_corte" else 0.3
+			tool_m.position.y = -hh / 2.0 + 0.1 * (1.0 if hd[0] != "alicate_corte" else 0.0)
 	# alicates
 	for i in 2:
 		var px := 0.5 + i * 0.17
 		box(Vector3(px, 0.1, 0.035), Vector3(0.07, 0.2, 0.015), steel, false, peg)
 		box(Vector3(px - 0.02, -0.12, 0.04), Vector3(0.025, 0.17, 0.025), redh, false, peg)
 		box(Vector3(px + 0.02, -0.12, 0.04), Vector3(0.025, 0.17, 0.025), redh, false, peg)
+
+	# ferramentas soltas nas mesas (deitadas)
+	_lying("chave_ajustavel", Vector3(2.15, 0.9, -7.7), 20.0, 0.016)
+	_lying("chave_fenda", Vector3(3.1, 0.9, -7.68), -35.0, 0.015)
+	_lying("philips", Vector3(3.3, 0.9, -7.8), 70.0, 0.017)
+	_lying("martelo", Vector3(-5.1, 0.9, -7.55), 8.0, 0.0, true)
+	_lying("lanterna", Vector3(-5.2, 0.9, -8.1), -15.0, 0.024, true)
+	# morsa presa na quina da bancada (a manivela fica para fora da borda)
+	var vice := _baked("morsa")
+	if vice != null:
+		vice.position = Vector3(-4.05, 0.9 - 0.086, -7.395)
+		add_child(vice)
+	# espingarda pendurada na parede leste da recepção
+	var rifle := _baked("rifle")
+	if rifle != null:
+		rifle.position = Vector3(12.88, 1.9, -2.05)
+		rifle.rotation_degrees.y = -90.0
+		add_child(rifle)
+	# tomadas (2 por cômodo) e interruptores de luz
+	for sk in [
+		[Vector3(-6.895, 0.35, -5.0), 90.0], [Vector3(6.895, 0.35, 5.0), -90.0],
+		[Vector3(-8.5, 0.35, -3.895), 0.0], [Vector3(-10.5, 0.35, 3.895), 180.0],
+		[Vector3(8.0, 0.35, -3.895), 0.0], [Vector3(10.0, 0.35, 3.895), 180.0],
+	]:
+		_wall_prop("tomada", sk[0], sk[1])
+	_wall_prop("interruptor_parede", Vector3(-6.895, 1.3, 2.4), 90.0)
+	_wall_prop("interruptor_parede", Vector3(-7.105, 1.3, 2.4), -90.0)
+	_wall_prop("interruptor_parede", Vector3(7.105, 1.3, 2.4), 90.0)
 
 	# (as estantes ficam só no depósito, à esquerda)
 
@@ -1640,7 +1693,7 @@ func _build_steps() -> void:
 		{"o": "Abra o capô do carro", "at": CAR_FRONT, "r": 1.9, "lift": true, "h": "[E] Abrir capô", "hold": 0.0, "go": _s2},
 		{"o": "Pegue o funil e o galão de óleo no estoque (depósito, porta à esquerda da garagem)", "at": Vector2(-11.3, -2.8), "r": 1.8, "h": "[E] Pegar funil e galão", "hold": 0.0, "go": _s3},
 		{"o": "Troque o óleo (segure E no carro)", "at": CAR_FRONT, "r": 1.9, "lift": true, "h": "Segure [E] para trocar o óleo", "hold": 4.0, "go": _s4},
-		{"o": "Pegue o multímetro na bancada", "at": Vector2(-4.3, -7.0), "r": 1.7, "h": "[E] Pegar multímetro", "hold": 0.0, "go": _s5},
+		{"o": "Pegue o multímetro na bancada", "at": Vector2(-4.7, -7.0), "r": 1.7, "h": "[E] Pegar multímetro", "hold": 0.0, "go": _s5},
 		{"o": "Teste a bateria do carro com o multímetro", "at": CAR_FRONT, "r": 1.9, "lift": true, "h": "[E] Testar bateria", "hold": 0.0, "go": _s6},
 		{"o": "Vá ao depósito (porta à esquerda da garagem) e pegue a bateria nova", "at": Vector2(-11.3, 0.0), "r": 2.3, "h": "[E] Pegar bateria nova", "hold": 0.0, "go": _s7},
 		{"o": "Troque a bateria do carro (segure E)", "at": CAR_FRONT, "r": 1.9, "lift": true, "h": "Segure [E] para instalar a bateria", "hold": 4.0, "go": _s8},

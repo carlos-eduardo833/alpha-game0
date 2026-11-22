@@ -33,3 +33,4 @@ chuva.ogg - gravacao de chuva baixada pelo Charles (preencher autor, site e lice
 passo1..6.ogg - gravacao de passos baixada pelo Charles (preencher autor, site e licenca)
 interruptor.ogg, curto_circuito.ogg, ambiente.ogg - sons baixados pelo Charles (preencher autor, site e licenca)
 light_switch_and_bulb.glb - modelo 3D do interruptor do portao (autor conforme pagina do Sketchfab)
+hammer, flathead_screwdriver, simple_philips_screwdriver, screwdriver_01, screwdriver_03, adjustable_wrench, bolt_cutter, flashlight, bench_vice, light_switch_and_wall_socket, winchester_rifle - modelos 3D baixados do Sketchfab pelo Charles (preencher autor e licenca de cada um)

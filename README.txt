@@ -169,3 +169,7 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 --- VERSAO 55 ---
 - Botao do portao trocado pelo interruptor (light_switch_and_bulb, so o interruptor). Clique ao fechar o portao.
 - Curto-circuito quando as lampadas falham. Som ambiente de fundo (AMBIENTE_DB = -24).
+--- VERSAO 56 ---
+- Ferramentas reais no quadro (martelo, chave ajustavel, philips, 3 chaves de fenda, alicate de corte) e algumas soltas nas mesas.
+- Morsa (bench vice) presa na quina da bancada; multimetro movido para x=-4,7.
+- 6 tomadas (2 por comodo) e 3 interruptores de luz nas paredes; espingarda pendurada na parede da recepcao.
