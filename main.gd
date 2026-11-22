@@ -54,6 +54,10 @@ var step_acc := 0.0
 var texcache := {}
 var lamps := []
 var flick_until := 0.0
+var anom_next := 45.0
+var anom_last := -1
+var anom_lamp := -1
+var anom_lamp_until := 0.0
 var ghost: Node3D
 var ghost_until := 0.0
 var gate: Node3D
@@ -1641,6 +1645,53 @@ func _larry_appear() -> void:
 	zt.tween_property(cam, "fov", base_fov, 0.7).set_trans(Tween.TRANS_SINE)
 
 
+func sfx3(s: AudioStream, pos: Vector3, db: float = 0.0, pitch: float = 1.0) -> void:
+	# som posicional (vem de um ponto da oficina)
+	var p := AudioStreamPlayer3D.new()
+	p.stream = s
+	p.volume_db = db
+	p.pitch_scale = pitch
+	p.unit_size = 6.0
+	p.position = pos
+	add_child(p)
+	p.play()
+	p.finished.connect(p.queue_free)
+
+
+func _anomalies() -> void:
+	# pequenas anomalias espalhadas pelo turno: nada de susto, só tensão
+	if over or step < 1 or t < anom_next or larry_state != 0:
+		return
+	anom_next = t + randf_range(40.0, 70.0)
+	var ev := randi() % 5
+	if ev == anom_last:
+		ev = (ev + 1) % 5
+	anom_last = ev
+	match ev:
+		0:   # uma lâmpada falha por alguns segundos
+			anom_lamp = randi() % lamps.size()
+			anom_lamp_until = t + randf_range(1.5, 3.0)
+			sfx(snd_clack, -16.0, 0.5)
+		1:   # passos do lado de fora, na chuva
+			var side := -1.0 if randf() > 0.5 else 1.0
+			var tw := create_tween()
+			for i in 5:
+				var pos := Vector3(side * (8.0 - i * 1.2), 1.0, -11.5)
+				tw.tween_callback(sfx3.bind(snd_step, pos, -4.0, 0.7))
+				tw.tween_interval(0.62)
+		2:   # batidas no portão
+			for i in 3:
+				get_tree().create_timer(0.5 * i).timeout.connect(sfx3.bind(snd_clack, Vector3(0, 2.0, 9.6), -2.0, 0.4))
+			say("...Alguém bateu no portão?", 3.0)
+		3:   # a porta da sala ao lado range sozinha
+			var rx := 7.0 if randf() > 0.5 else -7.0
+			sfx3(snd_creak, Vector3(rx, 1.5, 0.0), -3.0, 0.6)
+		4:   # a luz pisca e o rádio engasga
+			flick_until = t + 0.5
+			sfx(snd_hiss, -18.0, 0.6)
+			say("...", 1.5)
+
+
 func _larry_duck(seen: bool) -> void:
 	# Larry vira o rosto de leve (percebeu que foi visto), depois abaixa reto e se esconde atrás da parede
 	larry_state = 2
@@ -1838,13 +1889,7 @@ func _physics_process(delta: float) -> void:
 		sfx(snd_creak, -10.0)
 		flick_until = t + 0.6
 		say("O corredor dos fundos é sempre frio...", 3.5)
-	if in_dep and not ghost_done and step == 8 and px > -6.0:
-		ghost_done = true
-		ghost.position = Vector3(-3.5, 0, -6.8)
-		ghost.visible = true
-		ghost_until = t + 2.5
-		sfx(snd_creak, -10.0)
-		say("Deve ser o reflexo da chuva na janela.", 3.5)
+	_anomalies()
 
 	# Larry: aparece só quando o jogador pega o multímetro; some na hora quando o jogador olha
 	if larry != null and not over and larry_state == 1:
@@ -1907,10 +1952,13 @@ func _physics_process(delta: float) -> void:
 	press_e = false
 
 	# luzes
-	for pair in lamps:
+	for li in lamps.size():
+		var pair = lamps[li]
 		var l: OmniLight3D = pair[0]
 		var b: float = pair[1]
-		if t < flick_until:
+		if li == anom_lamp and t < anom_lamp_until:
+			l.light_energy = b * (0.08 if randf() > 0.35 else 0.5)
+		elif t < flick_until:
 			l.light_energy = b if randf() > 0.5 else b * 0.05
 		else:
 			l.light_energy = b + sin(t * 3.0) * b * 0.03

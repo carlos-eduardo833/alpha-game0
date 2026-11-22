@@ -147,3 +147,6 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 - Corrigido: capo aparecia preto por fora (material interno dupla-face). Agora fora = cor do carro, dentro = escuro.
 --- VERSAO 45 ---
 - Bateria nova aparece no lugar da velha (BAT_SPOT no topo do main.gd). Compartimento do motor com luz propria ao abrir o capo e interior do capo mais claro.
+--- VERSAO 46 ---
+- Removido o vulto (sombra) do deposito.
+- Pequenas anomalias aleatorias a cada 40-70 s: lampada falhando, passos na chuva, batidas no portao, porta rangendo, luz piscando.
