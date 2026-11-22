@@ -184,3 +184,5 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 - Portao com a chapa ondulada (material_corrugated_sheet_metal), ondas na horizontal (assets/textures/portao_chapa.jpg).
 --- VERSAO 61 ---
 - Som do portao fechando (portao_fechando.ogg, silencio inicial cortado). O portao agora desce em 7 s para acompanhar o som.
+--- VERSAO 62 ---
+- Radio movido para a parede leste da garagem (x 6,45 / z -4,5), a parede vazia ao lado da porta da recepcao.

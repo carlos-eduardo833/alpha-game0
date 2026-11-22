@@ -120,7 +120,7 @@ var snd_hiss: AudioStream
 var snd_lift: AudioStream
 var radio_bus := "Master"
 var radio_file := false          # true se o jogador colocou radio.mp3/ogg (aí não há noticiário)
-var radio_pos := Vector3(2.2, 1.0, 7.0)
+var radio_pos := Vector3(6.45, 1.0, -4.5)
 var radio_next := 14.0
 var radio_busy_until := 0.0
 var radio_i := 0
@@ -1105,16 +1105,16 @@ func _build_world() -> void:
 
 	# recepção (direita)
 	_table(Vector3(12.3, 0.0, -2.05), Vector3(2.4, 0.9, 1.1), 90.0)
-	_table(Vector3(2.2, 0.0, 7.0), Vector3(1.2, 0.9, 0.7))
+	_table(Vector3(6.45, 0.0, -4.5), Vector3(1.2, 0.9, 0.7), 90.0)
 	var rad := _baked("radio")
 	if rad != null:
-		rad.position = Vector3(2.2, 0.9, 7.0)
-		rad.rotation_degrees.y = 190.0
+		rad.position = Vector3(6.45, 0.9, -4.5)
+		rad.rotation_degrees.y = -90.0
 		rad.scale = Vector3.ONE * 1.8
 		add_child(rad)
 	else:
-		rbox(Vector3(2.2, 1.04, 7.0), Vector3(0.5, 0.28, 0.2), flat(Color(0.25, 0.16, 0.1)), 0.35, 0.35, false)
-		box(Vector3(2.2, 1.06, 7.0), Vector3(0.14, 0.06, 0.01), lit(Color(0.9, 0.6, 0.2)), false)
+		rbox(Vector3(6.45, 1.04, -4.5), Vector3(0.5, 0.28, 0.2), flat(Color(0.25, 0.16, 0.1)), 0.35, 0.35, false)
+		box(Vector3(6.45, 1.06, -4.5), Vector3(0.14, 0.06, 0.01), lit(Color(0.9, 0.6, 0.2)), false)
 	var sofa := _baked("sofa")
 	if sofa != null:
 		sofa.position = Vector3(10.3, 0.0, 3.2)
