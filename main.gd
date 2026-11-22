@@ -21,6 +21,7 @@ const TEXFILE := {"conc": "piso", "planks": "piso", "wall": "parede", "ceil": "t
 const CAR_BASE := Vector3(-3.0, 0.0, -2.5)     # centro do Fiat Uno e do elevador animado
 const LIFT2_BASE := Vector3(3.2, 0.0, -2.5)    # elevador parado (vaga vazia)
 const CAR_FRONT := Vector2(-3.0, 1.1)         # onde o jogador fica, na frente do carro
+const BAT_SPOT := Vector3(0.38, 0.63, 1.7)   # lugar da bateria dentro do compartimento do motor
 const CAR_TINT := Color.WHITE                  # cor extra do carro (Color.WHITE = cor original do modelo)
 
 # ---- onde o jogador se agacha para calibrar cada pneu (na ordem)
@@ -64,6 +65,7 @@ var car_model := false
 var car_root: Node3D
 var uno: Node3D
 var hood_pivot: Node3D
+var bay_light: OmniLight3D
 var lift_anim: AnimationPlayer
 var lift_carriage: Node3D
 var lift_rest_y := 1.0e9
@@ -820,16 +822,25 @@ func _build_world() -> void:
 	if uno != null:
 		hood_pivot = uno.find_child("HoodPivot", true, false) as Node3D
 	# compartimento do motor, visível quando o capô abre
+	bay_light = OmniLight3D.new()
+	bay_light.position = Vector3(0, 1.5, 2.0)
+	bay_light.light_color = Color(1.0, 0.92, 0.8)
+	bay_light.light_energy = 1.6
+	bay_light.omni_range = 3.0
+	bay_light.visible = false
+	car_root.add_child(bay_light)
 	box(Vector3(0, 0.6, 2.0), Vector3(1.3, 0.06, 1.3), flat(Color(0.04, 0.04, 0.05)), false, car_root)
 	box(Vector3(0, 0.67, 2.05), Vector3(0.7, 0.2, 0.72), flat(Color(0.14, 0.15, 0.17), 0.55, 0.6), false, car_root)
 	box(Vector3(-0.38, 0.69, 1.7), Vector3(0.22, 0.12, 0.2), flat(Color(0.1, 0.1, 0.12), 0.5, 0.5), false, car_root)
 	_add_body_at(car_root, Vector3(0, 0.72, 0.0), Vector3(2.0, 1.44, 5.8))
 	# as baterias do carro ficam guardadas fora de vista (o capô ainda não abre)
 	car_bat = _make_prop("bateria_velha")
-	car_bat.position = Vector3(0.42, 0.62, 1.75)
+	car_bat.position = BAT_SPOT
+	car_bat.scale = Vector3.ONE * 1.7
 	car_root.add_child(car_bat)
 	car_bat2 = _make_prop("bateria")
-	car_bat2.position = Vector3(0, -6.0, 0)
+	car_bat2.position = BAT_SPOT
+	car_bat2.scale = Vector3.ONE * 1.7
 	car_bat2.visible = false
 	car_root.add_child(car_bat2)
 
@@ -1588,6 +1599,7 @@ func _p7() -> void:
 func _s2() -> void:
 	sfx(snd_clack, -4.0)
 	sfx(snd_creak, -6.0, 0.8)
+	bay_light.visible = true
 	if hood_pivot != null:
 		var ot := create_tween()
 		ot.tween_property(hood_pivot, "rotation:x", deg_to_rad(-62.0), 1.0).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
@@ -1681,6 +1693,7 @@ func _s9() -> void:
 
 func _s10() -> void:
 	sfx(snd_creak, -8.0, 1.1)
+	bay_light.visible = false
 	if hood_pivot != null:
 		var ct := create_tween()
 		ct.tween_property(hood_pivot, "rotation:x", 0.0, 0.6).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
