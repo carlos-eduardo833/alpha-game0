@@ -129,3 +129,6 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 - Legendas aparecem digitando (TYPE_CPS no topo do main.gd controla a velocidade).
 --- VERSAO 37 ---
 - Corrigido erro de variavel duplicada (sm) criado pela folha da prancheta.
+--- VERSAO 38 ---
+- Bancada da garagem com proporcao menor (pernas menos esticadas), itens reposicionados.
+- Mesa do radio movida para a parede leste, ao lado do gabinete (libera a janela da recepcao). Removidos objetos antigos (caixa preta e papel).

@@ -536,15 +536,19 @@ func _shelf(pos: Vector3, rot: float, mission: bool = false, kit: bool = false) 
 			box(Vector3(cx2, 0.18 + 0.2, 0), Vector3(0.5, 0.4, 0.4), mat("crate", Color.WHITE, 1.0), false, h)
 
 
-func _table(base: Vector3, size: Vector3) -> void:
+func _table(base: Vector3, size: Vector3, rot: float = 0.0) -> void:
 	var m := _baked("mesa")
 	if m == null:
 		box(base + Vector3(0, size.y / 2.0, 0), size, mat("wood", Color.WHITE, 1.5))
 		return
 	m.position = base
 	m.scale = Vector3(size.x / 2.09, size.y / 0.96, size.z / 1.11)
+	m.rotation_degrees.y = rot
 	add_child(m)
-	solid_box(base + Vector3(0, size.y / 2.0, 0), size)
+	var csz := size
+	if absf(rot) > 45.0:
+		csz = Vector3(size.z, size.y, size.x)
+	solid_box(base + Vector3(0, size.y / 2.0, 0), csz)
 
 
 func _fillet(cx: float, cz: float, dx: float, dz: float, r: float, m: Material) -> void:
@@ -865,14 +869,14 @@ func _build_world() -> void:
 			solid_box(LIFT2_BASE + Vector3(sx * 1.32, 1.25, 0.0), Vector3(0.5, 2.5, 0.5))
 
 	# garagem: bancada, armários, pneus, caixas, quadro, estantes
-	_table(Vector3(-1.9, 0.0, -7.8), Vector3(3.0, 0.9, 1.2))
+	_table(Vector3(-2.2, 0.0, -7.8), Vector3(2.4, 0.9, 1.1))
 	clip = _baked("prancheta")
 	if clip != null:
-		clip.position = Vector3(-3.2, 0.9, -7.8)
+		clip.position = Vector3(-2.9, 0.9, -7.8)
 		clip.rotation_degrees.y = 20.0
 		add_child(clip)
 	else:
-		clip = box(Vector3(-3.2, 0.93, -7.8), Vector3(0.35, 0.03, 0.25), flat(Color(0.85, 0.85, 0.78)), false)
+		clip = box(Vector3(-2.9, 0.93, -7.8), Vector3(0.35, 0.03, 0.25), flat(Color(0.85, 0.85, 0.78)), false)
 	# folha de papel com escrita borrada em cima da prancheta
 	var pp_img := Image.create(24, 32, false, Image.FORMAT_RGBA8)
 	pp_img.fill(Color(0.88, 0.86, 0.78))
@@ -897,11 +901,11 @@ func _build_world() -> void:
 	pp_mesh.size = Vector3(0.17, 0.004, 0.25)
 	pp_sheet.mesh = pp_mesh
 	pp_sheet.material_override = pp_mat
-	pp_sheet.position = Vector3(-3.2, 0.9 + 0.046, -7.8)
+	pp_sheet.position = Vector3(-2.9, 0.9 + 0.046, -7.8)
 	pp_sheet.rotation_degrees.y = 20.0
 	add_child(pp_sheet)
 	multi = _make_prop("multi")
-	multi.position = Vector3(-1.0, 0.9, -7.8)
+	multi.position = Vector3(-1.6, 0.9, -7.8)
 	multi.scale = Vector3.ONE * 1.8
 	add_child(multi)
 	box(Vector3(-5.3, 0.95, -7.9), Vector3(0.4, 0.1, 0.15), flat(Color(0.6, 0.12, 0.12)), false)
@@ -969,18 +973,16 @@ func _build_world() -> void:
 	solid_box(Vector3(-8.2, 0.5, -3.1), Vector3(1, 1, 1))
 
 	# recepção (direita)
-	_table(Vector3(10.2, 0.0, -3.1), Vector3(3.2, 0.9, 1.4))
-	box(Vector3(10.4, 0.96, -3.1), Vector3(0.3, 0.12, 0.25), flat(Color(0.07, 0.07, 0.07)), false)
-	box(Vector3(11.4, 0.92, -3.1), Vector3(0.3, 0.02, 0.22), flat(Color(0.85, 0.85, 0.85)), false)
+	_table(Vector3(12.3, 0.0, -2.05), Vector3(2.4, 0.9, 1.1), 90.0)
 	var rad := _baked("radio")
 	if rad != null:
-		rad.position = Vector3(9.5, 0.9, -3.2)
-		rad.rotation_degrees.y = 12.0
+		rad.position = Vector3(12.3, 0.9, -2.05)
+		rad.rotation_degrees.y = -78.0
 		rad.scale = Vector3.ONE * 1.8
 		add_child(rad)
 	else:
-		rbox(Vector3(9.5, 1.04, -3.2), Vector3(0.5, 0.28, 0.2), flat(Color(0.25, 0.16, 0.1)), 0.35, 0.35, false)
-		box(Vector3(9.4, 1.06, -3.1), Vector3(0.14, 0.06, 0.01), lit(Color(0.9, 0.6, 0.2)), false)
+		rbox(Vector3(12.3, 1.04, -2.05), Vector3(0.5, 0.28, 0.2), flat(Color(0.25, 0.16, 0.1)), 0.35, 0.35, false)
+		box(Vector3(12.3, 1.06, -2.05), Vector3(0.14, 0.06, 0.01), lit(Color(0.9, 0.6, 0.2)), false)
 	var sofa := _baked("sofa")
 	if sofa != null:
 		sofa.position = Vector3(10.3, 0.0, 3.2)
@@ -1483,7 +1485,7 @@ func _build_audio() -> void:
 	var radio := AudioStreamPlayer3D.new()
 	radio.stream = _radio_stream()
 	radio.bus = radio_bus
-	radio.position = Vector3(9.5, 1.0, -3.2)
+	radio.position = Vector3(12.3, 1.0, -2.05)
 	radio.unit_size = 5.0
 	radio.max_distance = 35.0
 	radio.volume_db = -4.0
@@ -1495,12 +1497,12 @@ func _build_audio() -> void:
 func _build_steps() -> void:
 	steps = [
 		{"o": "Feche o portão principal (botão na parede, perto do portão)", "at": Vector2(4.5, 7.7), "r": 2.2, "h": "[E] Fechar portão", "hold": 0.0, "go": _s0},
-		{"o": "Leia a ordem de serviço na prancheta (bancada)", "at": Vector2(-3.2, -7.2), "r": 1.7, "h": "[E] Ler prancheta", "hold": 0.0, "go": _s1},
+		{"o": "Leia a ordem de serviço na prancheta (bancada)", "at": Vector2(-2.9, -7.2), "r": 1.7, "h": "[E] Ler prancheta", "hold": 0.0, "go": _s1},
 		{"o": "Pegue o calibrador de pneus na caixa de ferramentas (fundo da garagem)", "at": Vector2(5.2, -7.0), "r": 1.9, "h": "[E] Pegar calibrador", "hold": 0.0, "go": _p3},
 		{"o": "Abra o capô do carro", "at": CAR_FRONT, "r": 1.9, "lift": true, "h": "[E] Abrir capô", "hold": 0.0, "go": _s2},
 		{"o": "Pegue o funil e o galão de óleo no estoque (depósito, porta à esquerda da garagem)", "at": Vector2(-11.3, -2.8), "r": 1.8, "h": "[E] Pegar funil e galão", "hold": 0.0, "go": _s3},
 		{"o": "Troque o óleo (segure E no carro)", "at": CAR_FRONT, "r": 1.9, "lift": true, "h": "Segure [E] para trocar o óleo", "hold": 4.0, "go": _s4},
-		{"o": "Pegue o multímetro na bancada", "at": Vector2(-1.0, -7.2), "r": 1.7, "h": "[E] Pegar multímetro", "hold": 0.0, "go": _s5},
+		{"o": "Pegue o multímetro na bancada", "at": Vector2(-1.6, -7.2), "r": 1.7, "h": "[E] Pegar multímetro", "hold": 0.0, "go": _s5},
 		{"o": "Teste a bateria do carro com o multímetro", "at": CAR_FRONT, "r": 1.9, "lift": true, "h": "[E] Testar bateria", "hold": 0.0, "go": _s6},
 		{"o": "Vá ao depósito (porta à esquerda da garagem) e pegue a bateria nova", "at": Vector2(-11.3, 0.0), "r": 2.3, "h": "[E] Pegar bateria nova", "hold": 0.0, "go": _s7},
 		{"o": "Troque a bateria do carro (segure E)", "at": CAR_FRONT, "r": 1.9, "lift": true, "h": "Segure [E] para instalar a bateria", "hold": 4.0, "go": _s8},
