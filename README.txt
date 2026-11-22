@@ -173,3 +173,5 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 - Ferramentas reais no quadro (martelo, chave ajustavel, philips, 3 chaves de fenda, alicate de corte) e algumas soltas nas mesas.
 - Morsa (bench vice) presa na quina da bancada; multimetro movido para x=-4,7.
 - 6 tomadas (2 por comodo) e 3 interruptores de luz nas paredes; espingarda pendurada na parede da recepcao.
+--- VERSAO 57 ---
+- Multimetro trocado pelo retro_multimeter (texturas melhores), em pe sobre a bancada com os cabos na frente. Veja CREDITOS.txt.

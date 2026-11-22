@@ -498,8 +498,7 @@ func _prop_multi() -> Node3D:
 	var n := Node3D.new()
 	var mm := _baked("multimetro")
 	if mm != null:
-		mm.rotation_degrees.x = -90.0   # deitado, com o mostrador para cima
-		mm.position.y = 0.085
+		mm.position.y = 0.0   # em pé sobre a mesa, com os cabos espalhados na frente
 		n.add_child(mm)
 		return n
 	rbox(Vector3(0, 0.02, 0), Vector3(0.09, 0.04, 0.17), flat(Color(0.88, 0.75, 0.19), 0.4), 0.4, 0.4, false, n)
