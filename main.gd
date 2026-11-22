@@ -111,6 +111,7 @@ var radio_bus := "Master"
 var larry: Node3D
 var tire_i := 0
 var crouch := 0.0
+var larry_tween: Tween
 var larry_state := 0           # 0 escondido, 1 espiando, 2 sumindo
 var larry_next := 25.0
 var larry_until := 0.0
@@ -1574,7 +1575,10 @@ func _s4() -> void:
 func _larry_appear() -> void:
 	if larry == null:
 		return
+	if larry_tween:
+		larry_tween.kill()
 	larry.position = LARRY_SPOTS[1]      # janela em cima da bancada
+	larry.rotation = Vector3.ZERO
 	larry.visible = true
 	larry_state = 1
 	larry_born = t
@@ -1587,6 +1591,23 @@ func _larry_appear() -> void:
 	zt.tween_property(cam, "fov", base_fov * 0.55, 0.18).set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_OUT)
 	zt.tween_interval(1.0)
 	zt.tween_property(cam, "fov", base_fov, 0.7).set_trans(Tween.TRANS_SINE)
+
+
+func _larry_duck(seen: bool) -> void:
+	# Larry abaixa a cabeça rapidinho, escondendo-se atrás da parede, e some
+	larry_state = 2
+	if seen:
+		sfx(snd_creak, -12.0, 1.3)
+	if larry_tween:
+		larry_tween.kill()
+	larry_tween = create_tween()
+	var low: Vector3 = LARRY_SPOTS[1] + Vector3(0, -0.65, 0.0)
+	larry_tween.set_parallel(true)
+	larry_tween.tween_property(larry, "position", low, 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+	larry_tween.tween_property(larry, "rotation:z", deg_to_rad(-12.0), 0.35).set_trans(Tween.TRANS_SINE)
+	larry_tween.chain().tween_callback(func():
+		larry.visible = false
+		larry_state = 0)
 
 
 func _s5() -> void:
@@ -1776,14 +1797,11 @@ func _physics_process(delta: float) -> void:
 
 	# Larry: aparece só quando o jogador pega o multímetro; some na hora quando o jogador olha
 	if larry != null and not over and larry_state == 1:
-		var head: Vector3 = larry.global_position + Vector3(0, 1.6, 0)
+		var head: Vector3 = larry.global_position + Vector3(0, 2.0, 0)
 		var to := head - cam.global_position
 		var seen := cam.is_position_in_frustum(head) and to.length() < 22.0 and (-cam.global_transform.basis.z).dot(to.normalized()) > 0.9
 		if (seen and t > larry_born + 0.8) or t > larry_until:
-			larry.visible = false
-			larry_state = 0
-			if seen:
-				sfx(snd_creak, -14.0, 1.3)
+			_larry_duck(seen)
 
 	# interações
 	var h := ""
