@@ -136,3 +136,6 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 - Bancada de volta embaixo da janela esquerda dos fundos, com prancheta e multimetro; ronda da janela feita de frente para a bancada.
 --- VERSAO 40 ---
 - Larry agora abaixa a cabeca (animacao de 0,35 s) e se esconde atras da parede quando o jogador o ve ou o tempo acaba.
+--- VERSAO 41 ---
+- Larry: nova animacao (vira o rosto e abaixa reto).
+- Calibrador agora no compressor. Caixa de ferramentas sobre mesa (x=2,7) com quadro de ferramentas na parede.

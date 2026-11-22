@@ -956,10 +956,38 @@ func _build_world() -> void:
 
 	# caixa de ferramentas (guarda as chaves), encostada na parede dos fundos
 	var chest := _baked("caixa_ferramentas")
+	_table(Vector3(2.7, 0.0, -8.0), Vector3(1.5, 0.9, 0.8))
 	if chest != null:
-		chest.position = Vector3(5.2, 0.0, -8.1)
+		chest.position = Vector3(2.7, 0.9, -8.05)
 		add_child(chest)
-		solid_box(Vector3(5.2, 0.46, -8.1), Vector3(0.97, 0.92, 0.57))
+
+	# quadro de ferramentas (pegboard) na parede, acima da caixa
+	var peg := box(Vector3(2.7, 2.45, -8.38), Vector3(1.7, 0.9, 0.04), flat(Color(0.33, 0.25, 0.18)), false)
+	var steel := flat(Color(0.5, 0.52, 0.56), 0.5, 0.6)
+	var dark := flat(Color(0.16, 0.16, 0.18), 0.6, 0.5)
+	var wood := flat(Color(0.4, 0.26, 0.14))
+	var yellow := flat(Color(0.75, 0.6, 0.12))
+	var redh := flat(Color(0.6, 0.1, 0.08))
+	# chaves de boca (3 tamanhos)
+	for i in 3:
+		var wx := -0.7 + i * 0.16
+		var wl := 0.5 - i * 0.07
+		box(Vector3(wx, 0.05, 0.035), Vector3(0.035, wl, 0.015), steel, false, peg)
+		box(Vector3(wx, 0.05 + wl / 2.0, 0.035), Vector3(0.09, 0.07, 0.015), steel, false, peg)
+	# martelo
+	box(Vector3(-0.15, 0.0, 0.035), Vector3(0.04, 0.5, 0.025), wood, false, peg)
+	box(Vector3(-0.15, 0.27, 0.035), Vector3(0.16, 0.07, 0.03), dark, false, peg)
+	# chaves de fenda
+	for i in 3:
+		var sx := 0.05 + i * 0.1
+		box(Vector3(sx, 0.08, 0.035), Vector3(0.015, 0.32, 0.012), steel, false, peg)
+		box(Vector3(sx, -0.14, 0.04), Vector3(0.04, 0.14, 0.03), yellow if i != 1 else redh, false, peg)
+	# alicates
+	for i in 2:
+		var px := 0.5 + i * 0.17
+		box(Vector3(px, 0.1, 0.035), Vector3(0.07, 0.2, 0.015), steel, false, peg)
+		box(Vector3(px - 0.02, -0.12, 0.04), Vector3(0.025, 0.17, 0.025), redh, false, peg)
+		box(Vector3(px + 0.02, -0.12, 0.04), Vector3(0.025, 0.17, 0.025), redh, false, peg)
 
 	# (as estantes ficam só no depósito, à esquerda)
 
@@ -1499,7 +1527,7 @@ func _build_steps() -> void:
 	steps = [
 		{"o": "Feche o portão principal (botão na parede, perto do portão)", "at": Vector2(4.5, 7.7), "r": 2.2, "h": "[E] Fechar portão", "hold": 0.0, "go": _s0},
 		{"o": "Leia a ordem de serviço na prancheta (bancada)", "at": Vector2(-5.7, -7.0), "r": 1.7, "h": "[E] Ler prancheta", "hold": 0.0, "go": _s1},
-		{"o": "Pegue o calibrador de pneus na caixa de ferramentas (fundo da garagem)", "at": Vector2(5.2, -7.0), "r": 1.9, "h": "[E] Pegar calibrador", "hold": 0.0, "go": _p3},
+		{"o": "Pegue o calibrador de pneus no compressor de ar (fundo da garagem)", "at": Vector2(0.6, -7.2), "r": 1.9, "h": "[E] Pegar calibrador", "hold": 0.0, "go": _p3},
 		{"o": "Abra o capô do carro", "at": CAR_FRONT, "r": 1.9, "lift": true, "h": "[E] Abrir capô", "hold": 0.0, "go": _s2},
 		{"o": "Pegue o funil e o galão de óleo no estoque (depósito, porta à esquerda da garagem)", "at": Vector2(-11.3, -2.8), "r": 1.8, "h": "[E] Pegar funil e galão", "hold": 0.0, "go": _s3},
 		{"o": "Troque o óleo (segure E no carro)", "at": CAR_FRONT, "r": 1.9, "lift": true, "h": "Segure [E] para trocar o óleo", "hold": 4.0, "go": _s4},
@@ -1528,7 +1556,7 @@ func _s1() -> void:
 
 func _p3() -> void:
 	sfx(snd_clack, -8.0)
-	say("Calibrador na mão.", 2.5)
+	say("Calibrador na mão. Mangueira conectada ao compressor.", 2.5)
 
 
 func _p4() -> void:
@@ -1594,18 +1622,18 @@ func _larry_appear() -> void:
 
 
 func _larry_duck(seen: bool) -> void:
-	# Larry abaixa a cabeça rapidinho, escondendo-se atrás da parede, e some
+	# Larry vira o rosto de leve (percebeu que foi visto), depois abaixa reto e se esconde atrás da parede
 	larry_state = 2
 	if seen:
 		sfx(snd_creak, -12.0, 1.3)
 	if larry_tween:
 		larry_tween.kill()
 	larry_tween = create_tween()
-	var low: Vector3 = LARRY_SPOTS[1] + Vector3(0, -0.65, 0.0)
-	larry_tween.set_parallel(true)
-	larry_tween.tween_property(larry, "position", low, 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
-	larry_tween.tween_property(larry, "rotation:z", deg_to_rad(-12.0), 0.35).set_trans(Tween.TRANS_SINE)
-	larry_tween.chain().tween_callback(func():
+	var low: Vector3 = LARRY_SPOTS[1] + Vector3(0, -0.8, 0.0)
+	larry_tween.tween_property(larry, "rotation:y", deg_to_rad(28.0), 0.14).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	larry_tween.tween_interval(0.08)
+	larry_tween.tween_property(larry, "position", low, 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	larry_tween.tween_callback(func():
 		larry.visible = false
 		larry_state = 0)
 
