@@ -197,3 +197,5 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 - Sons reais: capo abrindo/fechando, trava da janela (rondas), elevador subindo/descendo (trechos de 6 s). Sem esses arquivos o jogo volta aos sons gerados por codigo.
 --- VERSAO 68 ---
 - Arvores procedurais trocadas pelo modelo de pinheiro (tree_3d_model_fir_spruce_pine, ~1.600 triangulos cada): 16 pinheiros perto das janelas do deposito, recepcao e fundos.
+--- VERSAO 69 ---
+- Capo: so os audios enviados (sem sons gerados por codigo, sem a batida grave do fim). Cortei 0,6 s de silencio do inicio do capo_abrindo e tirei o atraso do capo_fechando.
