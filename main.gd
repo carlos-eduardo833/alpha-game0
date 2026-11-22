@@ -765,6 +765,40 @@ func _lamp(pos: Vector3, energy: float, rng: float, shadow: bool) -> void:
 	lamps.append([l, energy])
 
 
+func _corrugated(w: float, h: float, pitch: float, amp: float, m: Material) -> MeshInstance3D:
+	# chapa ondulada de verdade (ondas na horizontal). Origem no centro; as ondas se repetem a cada "pitch"
+	# e o UV casa com a textura (21 ondas a cada 2 m), então relevo e imagem ficam alinhados
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var seg := 8
+	var rows := int(round(h / pitch * seg))
+	var xl := -w / 2.0
+	var xr := w / 2.0
+	for i in rows:
+		var ya := h * float(i) / float(rows)
+		var yb := h * float(i + 1) / float(rows)
+		var za := -amp * cos(TAU * ya / pitch)
+		var zb := -amp * cos(TAU * yb / pitch)
+		var sa := amp * TAU / pitch * sin(TAU * ya / pitch)
+		var sb := amp * TAU / pitch * sin(TAU * yb / pitch)
+		var na := Vector3(0, sa, -1).normalized()
+		var nb := Vector3(0, sb, -1).normalized()
+		var pts := [
+			[Vector3(xl, ya - h / 2.0, za), na, Vector2((xl + w / 2.0) / 2.0, ya / 2.0)],
+			[Vector3(xr, ya - h / 2.0, za), na, Vector2((xr + w / 2.0) / 2.0, ya / 2.0)],
+			[Vector3(xr, yb - h / 2.0, zb), nb, Vector2((xr + w / 2.0) / 2.0, yb / 2.0)],
+			[Vector3(xl, yb - h / 2.0, zb), nb, Vector2((xl + w / 2.0) / 2.0, yb / 2.0)],
+		]
+		for k in [0, 1, 2, 0, 2, 3]:
+			st.set_normal(pts[k][1])
+			st.set_uv(pts[k][2])
+			st.add_vertex(pts[k][0])
+	var mi := MeshInstance3D.new()
+	mi.mesh = st.commit()
+	mi.material_override = m
+	return mi
+
+
 func _window(x: float, z: float) -> void:
 	var q := MeshInstance3D.new()
 	var qm := QuadMesh.new()
@@ -873,12 +907,12 @@ func _build_world() -> void:
 		gate_m.albedo_color = Color(0.85, 0.82, 0.78)
 		gate_m.roughness = 0.65
 		gate_m.metallic = 0.35
-		gate_m.uv1_triplanar = true            # projeção presa ao próprio portão (acompanha quando ele sobe)
-		gate_m.uv1_world_triplanar = false
-		gate_m.uv1_scale = Vector3(0.5, 0.5, 0.5)   # 1 repetição a cada 2 m: ondas de ~10 cm, linhas na horizontal
+		gate_m.cull_mode = BaseMaterial3D.CULL_DISABLED   # chapa de uma face só: visível dos dois lados
 		gate_m.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
 		gate_mat = gate_m
-	gate = box(Vector3(0, 5.9, 8.35), Vector3(6, 3.2, 0.12), gate_mat, false)
+	gate = _corrugated(6.0, 3.2, 2.0 / 21.0, 0.03, gate_mat)
+	gate.position = Vector3(0, 5.9, 8.35)
+	add_child(gate)
 	box(Vector3(0, -1.58, 0), Vector3(6, 0.08, 0.16), flat(Color(0.2, 0.2, 0.22)), false, gate)   # barra de baixo
 	# painel fixo na frente do trilho do portão: ele sobe/desce "por trás" dele, sem aparecer saindo do teto
 	box(Vector3(0, 3.62, 8.2), Vector3(6.3, 0.95, 0.1), mat("wall", Color(0.8, 0.8, 0.84), 4.0), false)
