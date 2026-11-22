@@ -114,6 +114,14 @@ var snd_chime2: AudioStream
 var snd_hiss: AudioStream
 var snd_lift: AudioStream
 var radio_bus := "Master"
+var radio_file := false          # true se o jogador colocou radio.mp3/ogg (aí não há noticiário)
+var radio_pos := Vector3(12.3, 1.0, -2.05)
+var radio_next := 14.0
+var radio_busy_until := 0.0
+var radio_i := 0
+var radio_voice := ""
+var l_radio: Label
+var radio_tween: Tween
 var larry: Node3D
 var tire_i := 0
 var crouch := 0.0
@@ -133,6 +141,9 @@ func _ready() -> void:
 	_build_hud()
 	_build_steps()
 	_build_audio()
+	var vz := DisplayServer.tts_get_voices_for_language("pt")
+	if vz.size() > 0:
+		radio_voice = vz[0]
 	_set_obj()
 	_render_chk()
 	_show_overlay("Turno da Madrugada: Km 42", "Parte 1: A rotina\n\nUma oficina antiga na beira da rodovia, cercada de mata fechada. Chove fino lá fora. O chefe não vai conseguir voltar, e você está sozinho no turno.\n\nW A S D: andar     Mouse: olhar     E: interagir     Shift: correr     F11: tela cheia     Esc: pausa\n\nElevador: aponte a mira para o motor do elevador e aperte E para subir ou descer o carro.", "Começar")
@@ -1220,6 +1231,16 @@ func _build_hud() -> void:
 	l_obj.custom_minimum_size = Vector2(560, 0)
 	l_obj.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
+	l_radio = _lbl(root, 18, Color(0.62, 0.72, 0.8))
+	l_radio.anchor_top = 1.0
+	l_radio.anchor_bottom = 1.0
+	l_radio.offset_left = 18
+	offset_radio_fix(l_radio)
+	l_radio.custom_minimum_size = Vector2(520, 0)
+	l_radio.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	l_radio.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
+	l_radio.modulate.a = 0.0
+
 	l_chk = RichTextLabel.new()
 	l_chk.bbcode_enabled = true
 	l_chk.fit_content = true
@@ -1459,16 +1480,25 @@ func _radio_stream() -> AudioStream:
 		elif st is AudioStreamOggVorbis:
 			(st as AudioStreamOggVorbis).loop = true
 		if st is AudioStream:
-			var bi := AudioServer.bus_count
-			AudioServer.add_bus(bi)
-			AudioServer.set_bus_name(bi, "Radio")
-			var lpf := AudioEffectLowPassFilter.new()
-			lpf.cutoff_hz = 2600.0
-			AudioServer.add_bus_effect(bi, lpf)
-			AudioServer.set_bus_send(bi, "Master")
-			radio_bus = "Radio"
+			_ensure_radio_bus()
+			radio_file = true
 			return st
+	_ensure_radio_bus()
 	return _radio()
+
+
+func _ensure_radio_bus() -> void:
+	if AudioServer.get_bus_index("Radio") >= 0:
+		radio_bus = "Radio"
+		return
+	var bi := AudioServer.bus_count
+	AudioServer.add_bus(bi)
+	AudioServer.set_bus_name(bi, "Radio")
+	var lpf := AudioEffectLowPassFilter.new()
+	lpf.cutoff_hz = 3200.0
+	AudioServer.add_bus_effect(bi, lpf)
+	AudioServer.set_bus_send(bi, "Master")
+	radio_bus = "Radio"
 
 
 func _radio() -> AudioStreamWAV:
@@ -1490,12 +1520,12 @@ func _radio() -> AudioStreamWAV:
 		if nt > 0.0:
 			ph += nt / float(SR)
 			var env := exp(-local * 4.0) * minf(local * 60.0, 1.0)
-			s = (sin(TAU * ph) + 0.5 * sin(TAU * ph * 2.0) + 0.25 * sin(TAU * ph * 3.0)) * env * 0.35
+			s = 0.0
 		s *= 0.7 + 0.3 * sin(TAU * tt / dur * 5.0)
 		lp += (s - lp) * 0.12
 		var x := randf() * 2.0 - 1.0
 		y += (x - y) * 0.5
-		var stat := (x - y) * 0.12 * (0.6 + 0.4 * sin(TAU * tt / dur * 3.0))
+		var stat := (x - y) * 0.09 * (0.6 + 0.4 * sin(TAU * tt / dur * 3.0))
 		if randf() < 0.0004:
 			stat += randf_range(-0.6, 0.6)
 		a[i] = lp + stat
@@ -1535,10 +1565,10 @@ func _build_audio() -> void:
 	var radio := AudioStreamPlayer3D.new()
 	radio.stream = _radio_stream()
 	radio.bus = radio_bus
-	radio.position = Vector3(12.3, 1.0, -2.05)
+	radio.position = radio_pos
 	radio.unit_size = 5.0
 	radio.max_distance = 35.0
-	radio.volume_db = -4.0
+	radio.volume_db = -9.0
 	add_child(radio)
 	radio.play()
 
@@ -1690,6 +1720,53 @@ func _anomalies() -> void:
 			flick_until = t + 0.5
 			sfx(snd_hiss, -18.0, 0.6)
 			say("...", 1.5)
+
+
+func offset_radio_fix(l: Label) -> void:
+	l.offset_top = -120.0
+	l.offset_bottom = -20.0
+
+
+const RADIO_NEWS := [
+	"Boa noite, ouvintes. Você está na Rádio Estrada FM. São duas e quarenta da madrugada.",
+	"A chuva forte continua em toda a região. A previsão é de tempo instável e rajadas de vento até o amanhecer.",
+	"Trânsito livre na rodovia, mas atenção redobrada no quilômetro quarenta e dois. A visibilidade no trecho é muito baixa.",
+	"A prefeitura anunciou que as obras na avenida central devem terminar apenas no próximo semestre.",
+	"A polícia rodoviária investiga o desaparecimento de três motoristas na região do quilômetro quarenta e dois, nas últimas semanas.",
+	"Segundo a polícia, os carros foram encontrados em perfeito estado, com as chaves na ignição e os faróis acesos.",
+	"Os motoristas que viajam de madrugada são aconselhados a não parar em trechos desertos da rodovia.",
+	"E agora, uma mensagem dos nossos patrocinadores. Oficina do Seu Armando: revisão completa, atendimento a qualquer hora.",
+	"Repetimos o alerta: se você está sozinho na estrada, mantenha as portas trancadas e não olhe pelas janelas.",
+	"Boletim das três horas. A temperatura é de quatorze graus. Não há previsão de que a chuva pare.",
+	"Moradores relatam ruídos estranhos perto da rodovia durante a noite. A prefeitura diz que não há motivo para alarme.",
+	"Lembrete aos ouvintes: nunca atenda a porta depois da meia-noite. Obrigado por ficar conosco.",
+]
+
+
+func _radio_tick() -> void:
+	# noticiário do rádio: voz do sistema (se houver voz em português), legenda e chiado
+	if radio_file or over or t < radio_next:
+		return
+	var dist := player.global_position.distance_to(radio_pos)
+	var text: String = RADIO_NEWS[radio_i % RADIO_NEWS.size()]
+	radio_i += 1
+	var dur := 2.0 + float(text.length()) * 0.075
+	radio_next = t + dur + randf_range(3.0, 7.0)
+	sfx3(snd_hiss, radio_pos, -14.0, 1.6)
+	if dist < 16.0 and radio_voice != "":
+		var vol := int(clampf(100.0 - dist * 5.5, 0.0, 100.0))
+		if vol > 5:
+			DisplayServer.tts_speak(text, radio_voice, vol, 0.85, 0.92)
+	if dist < 7.0:
+		l_radio.text = "[Rádio] " + text
+		l_radio.visible_characters = 0
+		l_radio.modulate.a = 1.0
+		if radio_tween:
+			radio_tween.kill()
+		radio_tween = create_tween()
+		radio_tween.tween_property(l_radio, "visible_characters", l_radio.text.length(), dur * 0.8)
+		radio_tween.tween_interval(2.0)
+		radio_tween.tween_property(l_radio, "modulate:a", 0.0, 0.6)
 
 
 func _larry_duck(seen: bool) -> void:
@@ -1890,6 +1967,7 @@ func _physics_process(delta: float) -> void:
 		flick_until = t + 0.6
 		say("O corredor dos fundos é sempre frio...", 3.5)
 	_anomalies()
+	_radio_tick()
 
 	# Larry: aparece só quando o jogador pega o multímetro; some na hora quando o jogador olha
 	if larry != null and not over and larry_state == 1:

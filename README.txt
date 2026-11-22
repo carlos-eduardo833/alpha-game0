@@ -150,3 +150,5 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 --- VERSAO 46 ---
 - Removido o vulto (sombra) do deposito.
 - Pequenas anomalias aleatorias a cada 40-70 s: lampada falhando, passos na chuva, batidas no portao, porta rangendo, luz piscando.
+--- VERSAO 47 ---
+- Radio: sem musica. Chiado de estatica + noticiario lido com a voz do sistema (portugues) e legenda perto do radio. Noticias em RADIO_NEWS no main.gd. radio.mp3/ogg em assets/audio ainda substitui tudo.

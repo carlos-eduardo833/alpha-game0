@@ -1,6 +1,6 @@
-COMO TROCAR A MUSICA DO RADIO
-1) Escolha uma musica que voce tenha direito de usar (sem direitos autorais ou com licenca livre).
-2) Coloque o arquivo aqui nesta pasta (assets/audio) com o nome:  radio.mp3  ou  radio.ogg
-3) Abra o projeto no Godot e espere ele importar. Pronto: o jogo toca a musica em loop,
-   com o som abafado (como num radio velho) e mais alto perto do radio.
-Se nao houver arquivo aqui, o jogo usa a melodia original de sempre.
+RADIO DA OFICINA
+- Por padrao o radio fica com chiado de estatica e le um noticiario (voz do Windows em portugues, se existir;
+  se nao houver voz em portugues, aparece so a legenda quando voce chega perto do radio).
+  Para editar as noticias, procure RADIO_NEWS no inicio do bloco "_radio_tick" no main.gd.
+- Para tocar uma MUSICA ou gravacao sua no lugar: coloque aqui um arquivo chamado radio.mp3 ou radio.ogg
+  (use so o que voce tiver direito de usar). Ele toca em loop, abafado, e o noticiario desliga.
