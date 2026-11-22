@@ -113,6 +113,7 @@ var snd_gate: AudioStream
 var snd_switch: AudioStream     # clique do interruptor do portão
 var snd_short: AudioStream      # curto-circuito (lâmpadas falhando)
 var snd_gate2: AudioStream
+var snd_gate_file: AudioStream   # portao_fechando.ogg (opcional)
 var snd_chime1: AudioStream
 var snd_chime2: AudioStream
 var snd_hiss: AudioStream
@@ -1679,6 +1680,9 @@ func _build_audio() -> void:
 			add_child(ambp)
 			ambp.play()
 	snd_gate2 = _tone(60.0, 2.0, 0.3, -1.0, 1)
+	var pg := _find_asset("res://assets/audio/", "portao_fechando", [".ogg", ".wav", ".mp3"])
+	if pg != "":
+		snd_gate_file = load(pg)
 	snd_hiss = _noise(1.0, 0.5, true, 0.3, true)
 	snd_lift = _tone(70.0, 6.5, 0.3, 85.0, 1)
 	snd_chime1 = _tone(1320.0, 1.4, 0.3)
@@ -1732,9 +1736,13 @@ func _build_steps() -> void:
 
 func _s0() -> void:
 	sfx3(snd_switch if snd_switch != null else snd_clack, Vector3(4.5, 1.3, 8.3), 2.0)
-	sfx(snd_gate, -4.0)
-	sfx(snd_gate2, -8.0)
-	create_tween().tween_property(gate, "position:y", 1.6, 2.0)
+	if snd_gate_file != null:
+		sfx(snd_gate_file, -2.0)
+		create_tween().tween_property(gate, "position:y", 1.6, 7.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	else:
+		sfx(snd_gate, -4.0)
+		sfx(snd_gate2, -8.0)
+		create_tween().tween_property(gate, "position:y", 1.6, 2.0)
 
 
 func _s1() -> void:

@@ -17,3 +17,4 @@ OUTROS SONS
 - interruptor.ogg: clique do botao do portao. curto_circuito.ogg: lampadas falhando.
 - ambiente.ogg: som ambiente de fundo em loop, bem baixo. O volume fica em AMBIENTE_DB no topo do main.gd
   (-24 = quase inaudivel; -12 = mais presente; 0 = volume original do arquivo).
+- portao_fechando.ogg: som do portao fechando (assets/audio).

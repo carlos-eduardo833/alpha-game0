@@ -182,3 +182,5 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 - Bateria velha agora e o mesmo modelo, escurecido. Radio movido para x=2,2 (longe do interruptor do portao). Espingarda 40% maior.
 --- VERSAO 60 ---
 - Portao com a chapa ondulada (material_corrugated_sheet_metal), ondas na horizontal (assets/textures/portao_chapa.jpg).
+--- VERSAO 61 ---
+- Som do portao fechando (portao_fechando.ogg, silencio inicial cortado). O portao agora desce em 7 s para acompanhar o som.

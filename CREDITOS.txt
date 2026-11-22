@@ -36,3 +36,4 @@ light_switch_and_bulb.glb - modelo 3D do interruptor do portao (autor conforme p
 hammer, flathead_screwdriver, simple_philips_screwdriver, screwdriver_01, screwdriver_03, adjustable_wrench, bolt_cutter, flashlight, bench_vice, light_switch_and_wall_socket, winchester_rifle - modelos 3D baixados do Sketchfab pelo Charles (preencher autor e licenca de cada um)
 retro_multimeter - modelo 3D do multimetro (autor conforme pagina do Sketchfab; preencher autor e licenca)
 material_corrugated_sheet_metal - textura da chapa ondulada do portao (autor conforme pagina do Sketchfab; preencher autor e licenca)
+portao_fechando.ogg - gate-closing (freesound 496740, usuario 16gpanskakomarkova_marina; conferir licenca na pagina)
