@@ -1038,8 +1038,12 @@ func _build_world() -> void:
 		add_child(comp)
 		solid_box(Vector3(0.6, 0.56, -8.14), Vector3(1.6, 1.12, 0.5))
 
-	# mesa de ferramentas (sem a caixa vermelha)
+	# mesa de ferramentas com a caixa de ferramentas
 	_table(Vector3(2.7, 0.0, -8.0), Vector3(1.5, 0.9, 0.8))
+	var chest := _baked("caixa_ferramentas")
+	if chest != null:
+		chest.position = Vector3(2.7, 0.9, -8.05)
+		add_child(chest)
 
 	# quadro de ferramentas (pegboard) na parede, acima da caixa
 	var peg := box(Vector3(2.7, 2.45, -8.38), Vector3(1.7, 0.9, 0.04), flat(Color(0.33, 0.25, 0.18)), false)

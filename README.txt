@@ -191,3 +191,5 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 - (v64) renomeei uma variavel do portao para evitar conflito de nome.
 --- VERSAO 65 ---
 - Painel fixo na frente do trilho do portao (ele passa por tras). Elevador sobe mais (LIFT_SCALE_Y). Arvores proximas das janelas do deposito e da recepcao. Caixa vermelha da bancada removida de verdade. Lanterna na frente da mesa. Larry colado no vidro (z -8,47).
+--- VERSAO 66 ---
+- Caixa de ferramentas (modelo) devolvida a mesa de ferramentas (tinha sido removida por engano na v63).
