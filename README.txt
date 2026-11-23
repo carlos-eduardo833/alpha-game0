@@ -237,3 +237,6 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 
 --- VERSAO 84 ---
 - Larry levantando: tirado o "pulo pra frente" no fim (o quadril andava 1,6 m sozinho na animacao de levantar e voltava de uma vez no idle). Agora levanta no lugar e a emenda com o idle e suave.
+
+--- VERSAO 85 ---
+- Floresta trocada por "A forest 3 with a road at night for game" (textura melhor, estrada incluida). Agora e uma floresta unica e grande (antes eram 3 copias da antiga).

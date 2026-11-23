@@ -1229,16 +1229,8 @@ func _build_world() -> void:
 	if fl != null:
 		fl.position = FOREST_POS
 		add_child(fl)
-		_tint(fl, Color(0.30, 0.36, 0.52))   # noite: mata azulada e escura
+		_tint(fl, Color(0.40, 0.48, 0.68))   # noite: mata azulada e escura
 		_set_layers(fl, 2)
-		# mais duas cópias deslocadas para os lados: mata mais densa e mais perto da garagem
-		for fx in [7.0, -7.0]:
-			var fl2 := _baked("floresta")
-			if fl2 != null:
-				fl2.position = Vector3(fx, -0.5, -25.0)
-				add_child(fl2)
-				_tint(fl2, Color(0.30, 0.36, 0.52))
-				_set_layers(fl2, 2)
 	# árvores (pinheiros) bem perto das janelas: depósito, recepção e fundos da garagem
 	var wtrees := Node3D.new()
 	add_child(wtrees)
