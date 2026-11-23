@@ -218,3 +218,12 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 - Placas RECEPCAO e DEPOSITO sobre as portas (lado da garagem). Sem o barulho do Larry abaixando. Elevador mais alto (LIFT_SCALE_Y 1,85).
 --- VERSAO 79 ---
 - Larry sobe devagar na janela (com hesitacao) e, ao ser visto, vira o rosto e sai correndo pela lateral, com passos. Na ronda das janelas ele fica escondido entre os pinheiros, meio atras de um tronco, olhando para o jogador. Anomalia 'batida no portao' virou 'batidas no vidro' da janela mais proxima, com batidas_vidro.ogg.
+
+--- VERSAO 80 ---
+- Larry de corpo inteiro (Mixamo, animacao Run.fbx em assets/models/larry_run.fbx) corre ao fugir.
+- Ronda das janelas: o Larry so aparece na janela do deposito (a trava frouxa) e sai correndo quando voce aperta.
+
+--- VERSAO 81 ---
+- Larry com animacoes Mixamo: levantar (Zombie Stand Up) na janela da bancada, ficar parado (Idle) e correr (Run).
+- Na ronda, o Larry fica parado (idle) entre as arvores da janela do deposito e corre quando voce aperta a trava.
+- Arquivos: assets/models/larry_run.fbx (com malha), larry_rise.fbx, larry_idle.fbx (sem malha).

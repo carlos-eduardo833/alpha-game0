@@ -42,6 +42,7 @@ const WIN_Y1 := 2.5                            # parte de cima das janelas
 const WIN_HALF := 1.2                          # metade da largura das janelas
 const FOREST_POS := Vector3(0.0, -0.5, -25.5)  # onde fica a floresta (atrás do fundo da oficina)
 const LARRY_SPOTS := [Vector3(5.3, -0.6, -8.47), Vector3(-4.7, -0.6, -8.47)]   # só a cabeça aparece na janela
+const LARRY_ALTURA := 2.2                       # altura do Larry de corpo inteiro (o do Mixamo), em metros
 const LARRY_FIRST := 25.0                      # segundos até a primeira aparição
 
 var player: CharacterBody3D
@@ -148,6 +149,12 @@ var larry: Node3D
 var tire_i := 0
 var crouch := 0.0
 var larry_tween: Tween
+var larry_body: Node3D             # Larry de corpo inteiro (Mixamo) usado na corrida
+var larry_body_anim: AnimationPlayer
+var larry_body_ready := false
+var larry_feet := 0.0
+var larry_anims_ok := false
+var larry_tree_on := false
 var larry2: Node3D                 # Larry escondido no meio das árvores (rondas das janelas)
 var snd_knock: AudioStream         # batidas_vidro.ogg (opcional)
 var larry_state := 0           # 0 escondido, 1 espiando, 2 sumindo
@@ -1320,6 +1327,17 @@ func _build_world() -> void:
 		larry.scale = Vector3.ONE * 1.25
 		add_child(larry)
 		_set_layers(larry, 3)
+		if ResourceLoader.exists("res://assets/models/larry_run.fbx"):
+			var lscn = load("res://assets/models/larry_run.fbx")
+			if lscn is PackedScene:
+				larry_body = lscn.instantiate()
+				larry_body.visible = false
+				add_child(larry_body)
+				_set_layers(larry_body, 3)
+				var lb_aps := larry_body.find_children("*", "AnimationPlayer", true, false)
+				if lb_aps.size() > 0:
+					larry_body_anim = lb_aps[0]
+					_larry_load_anims()
 		larry2 = _baked("larry")
 		if larry2 != null:
 			larry2.visible = false
@@ -2033,10 +2051,10 @@ func _build_steps() -> void:
 		{"o": "Troque a bateria do carro (segure E)", "at": CAR_FRONT, "r": 1.9, "lift": true, "h": "Segure [E] para instalar a bateria", "hold": 4.0, "go": _s8},
 		{"o": "Pegue o calibrador de pneus no compressor de ar (fundo da garagem)", "at": Vector2(0.6, -7.2), "r": 1.9, "h": "[E] Pegar calibrador", "hold": 0.0, "go": _p3},
 		{"o": "Calibre os pneus: pneu 1 de 4 (agache ao lado da roda, segure E)", "at": TIRE_SPOTS[0], "r": 1.0, "lift": true, "multi": 4, "h": "Segure [E] para calibrar o pneu", "hold": 3.5, "go": _s9},
-		{"o": "Ronda do turno: verifique a janela dos fundos (lado direito)", "at": Vector2(5.0, -7.5), "r": 1.8, "h": "Segure [E] para checar a trava", "hold": 2.0, "tree": Vector3(5.25, -0.4, -11.8), "go": _p4},
-		{"o": "Ronda do turno: verifique a janela dos fundos (lado esquerdo)", "at": Vector2(-5.0, -6.4), "r": 1.6, "h": "Segure [E] para checar a trava", "hold": 2.0, "tree": Vector3(-5.7, -0.4, -11.9), "go": _p5},
+		{"o": "Ronda do turno: verifique a janela dos fundos (lado direito)", "at": Vector2(5.0, -7.5), "r": 1.8, "h": "Segure [E] para checar a trava", "hold": 2.0, "go": _p4},
+		{"o": "Ronda do turno: verifique a janela dos fundos (lado esquerdo)", "at": Vector2(-5.0, -6.4), "r": 1.6, "h": "Segure [E] para checar a trava", "hold": 2.0, "go": _p5},
 		{"o": "Ronda do turno: verifique a janela do depósito", "at": Vector2(-10.0, -3.0), "r": 1.8, "h": "Segure [E] para checar a trava", "hold": 2.0, "tree": Vector3(-10.6, -0.4, -8.9), "go": _p6},
-		{"o": "Ronda do turno: verifique a janela da recepção", "at": Vector2(10.0, -3.0), "r": 1.8, "h": "Segure [E] para checar a trava", "hold": 2.0, "tree": Vector3(10.6, -0.4, -8.9), "go": _p7},
+		{"o": "Ronda do turno: verifique a janela da recepção", "at": Vector2(10.0, -3.0), "r": 1.8, "h": "Segure [E] para checar a trava", "hold": 2.0, "go": _p7},
 		{"o": "Feche o capô", "at": CAR_FRONT, "r": 1.9, "lift": true, "h": "[E] Fechar capô", "hold": 0.0, "go": _s10},
 	]
 
@@ -2125,6 +2143,15 @@ func _p5() -> void:
 func _p6() -> void:
 	sfx(snd_lock if snd_lock != null else snd_creak, -4.0)
 	say("Janela do depósito: a trava estava frouxa. Apertei.", 3.5)
+	# só aqui o Larry estava de olho: ele sai correndo mato adentro
+	if larry_body != null and larry_body_anim != null and larry2 != null:
+		var from: Vector3 = Vector3(-10.6, -0.4, -8.9)
+		larry2.visible = false
+		_larry_body_run(from, -1.0)
+		for i in 8:
+			var ft := 0.3 + i * 0.15
+			var fp: Vector3 = from + Vector3(-(ft - 0.3) * (ft - 0.3) * 5.0, 0.0, -0.6 * (ft - 0.3))
+			get_tree().create_timer(ft).timeout.connect(sfx3.bind(_step_snd(), fp, -3.0 - i * 1.2, 1.15))
 
 
 func _p7() -> void:
@@ -2162,6 +2189,39 @@ func _larry_appear() -> void:
 		larry_tween.kill()
 	# sobe devagar, com uma hesitação no meio, como se ele estivesse espiando pela janela
 	var top: Vector3 = LARRY_SPOTS[1]      # janela em cima da bancada
+	if larry_body != null and larry_anims_ok:
+		# corpo inteiro (Mixamo): levanta do chão do lado de fora, devagar, e fica parado olhando
+		_larry_body_prep()
+		larry.position = top
+		larry.visible = false
+		larry_state = 1
+		larry_tree_on = false
+		larry_born = t + 5.6
+		larry_until = t + 15.0
+		larry_body.position = Vector3(top.x, -0.1 - larry_feet, -9.6)
+		larry_body.rotation = Vector3(0, deg_to_rad(8.0), 0)
+		larry_body.visible = true
+		larry_body_anim.play("rise")
+		larry_body_anim.queue("idle")
+		larry_tween = create_tween()
+		larry_tween.tween_property(larry_body, "position:z", -8.6, 5.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		larry_tween.parallel().tween_property(larry_body, "rotation:y", 0.0, 5.5)
+	else:
+		_larry_appear_head(top)
+	flick_until = t + 0.5
+	if snd_short != null:
+		sfx3(snd_short, Vector3(0.0, 3.0, 0.0), -3.0)
+	else:
+		sfx(snd_creak, -2.0, 0.7)
+		sfx(snd_clack, -2.0, 0.6)
+	var base_fov := 75.0
+	var zt := create_tween()
+	zt.tween_property(cam, "fov", base_fov * 0.55, 0.18).set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_OUT)
+	zt.tween_interval(1.0)
+	zt.tween_property(cam, "fov", base_fov, 0.7).set_trans(Tween.TRANS_SINE)
+
+
+func _larry_appear_head(top: Vector3) -> void:
 	larry.position = top + Vector3(0, -1.5, 0)
 	larry.rotation = Vector3(0, deg_to_rad(16.0), deg_to_rad(-3.0))
 	larry.visible = true
@@ -2174,17 +2234,6 @@ func _larry_appear() -> void:
 	larry_tween.tween_interval(0.7)
 	larry_tween.tween_property(larry, "position", top, 1.7).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	larry_tween.parallel().tween_property(larry, "rotation", Vector3.ZERO, 1.7).set_trans(Tween.TRANS_SINE)
-	flick_until = t + 0.5
-	if snd_short != null:
-		sfx3(snd_short, Vector3(0.0, 3.0, 0.0), -3.0)
-	else:
-		sfx(snd_creak, -2.0, 0.7)
-		sfx(snd_clack, -2.0, 0.6)
-	var base_fov := 75.0
-	var zt := create_tween()
-	zt.tween_property(cam, "fov", base_fov * 0.55, 0.18).set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_OUT)
-	zt.tween_interval(1.0)
-	zt.tween_property(cam, "fov", base_fov, 0.7).set_trans(Tween.TRANS_SINE)
 
 
 func _step_snd() -> AudioStream:
@@ -2396,6 +2445,98 @@ func _radio_tick() -> void:
 
 
 
+func _larry_load_anims() -> void:
+	# junta ao corpo do Larry as animações "sem pele" do Mixamo (correr, levantar, parado)
+	var ap := larry_body_anim
+	var lib := ap.get_animation_library("")
+	if lib == null:
+		return
+	var skel_list := larry_body.find_children("*", "Skeleton3D", true, false)
+	if skel_list.size() == 0:
+		return
+	var proot: Node = ap.get_node_or_null(ap.root_node)
+	if proot == null:
+		proot = larry_body
+	var skel_path := str(proot.get_path_to(skel_list[0]))
+	# a corrida que veio com o corpo
+	for nm in ap.get_animation_list():
+		if nm != "RESET":
+			var ra := ap.get_animation(nm).duplicate()
+			ra.loop_mode = Animation.LOOP_LINEAR
+			lib.add_animation("run", ra)
+			break
+	for pair in [["rise", "res://assets/models/larry_rise.fbx", false], ["idle", "res://assets/models/larry_idle.fbx", true]]:
+		if not ResourceLoader.exists(pair[1]):
+			continue
+		var sc = load(pair[1])
+		if not (sc is PackedScene):
+			continue
+		var inst: Node = sc.instantiate()
+		var aps2 := inst.find_children("*", "AnimationPlayer", true, false)
+		if aps2.size() > 0:
+			var src: AnimationPlayer = aps2[0]
+			for nm2 in src.get_animation_list():
+				if nm2 == "RESET":
+					continue
+				var an: Animation = src.get_animation(nm2).duplicate()
+				an.loop_mode = Animation.LOOP_LINEAR if pair[2] else Animation.LOOP_NONE
+				for ti in an.get_track_count():
+					var np: NodePath = an.track_get_path(ti)
+					var bone := np.get_concatenated_subnames()
+					if bone != "":
+						an.track_set_path(ti, NodePath(skel_path + ":" + bone))
+						# o quadril não pode "andar" sozinho: tira o deslocamento horizontal
+						if an.track_get_type(ti) == Animation.TYPE_POSITION_3D and bone.ends_with("Hips") and an.track_get_key_count(ti) > 0:
+							var p0: Vector3 = an.track_get_key_value(ti, 0)
+							for ki in an.track_get_key_count(ti):
+								var pv: Vector3 = an.track_get_key_value(ti, ki)
+								an.track_set_key_value(ti, ki, Vector3(pv.x - p0.x, pv.y, pv.z - p0.z))
+				lib.add_animation(pair[0], an)
+				break
+		inst.free()
+	larry_anims_ok = lib.has_animation("run") and lib.has_animation("rise") and lib.has_animation("idle")
+
+
+func _larry_body_prep() -> void:
+	# ajusta o tamanho do Larry de corpo inteiro (a escala do FBX varia) e descobre onde ficam os pés
+	if larry_body_ready or larry_body == null:
+		return
+	larry_body_ready = true
+	larry_body.position = Vector3.ZERO
+	larry_body.rotation = Vector3.ZERO
+	larry_body.scale = Vector3.ONE
+	var mis := larry_body.find_children("*", "MeshInstance3D", true, false)
+	if mis.size() == 0:
+		return
+	var mi: MeshInstance3D = mis[0]
+	var ab: AABB = mi.global_transform * mi.get_aabb()
+	if ab.size.y > 0.001:
+		larry_body.scale = Vector3.ONE * (LARRY_ALTURA / ab.size.y)
+		ab = mi.global_transform * mi.get_aabb()
+		larry_feet = ab.position.y - larry_body.global_position.y
+
+
+func _larry_body_run(from: Vector3, dir: float) -> void:
+	# Larry de corpo inteiro (animação do Mixamo): vira para o lado e sai correndo
+	_larry_body_prep()
+	larry.visible = false
+	larry_tree_on = false
+	larry_state = 2
+	larry_body.position = Vector3(from.x, -0.1 - larry_feet, from.z)
+	larry_body.rotation = Vector3.ZERO
+	larry_body.visible = true
+	if larry_body_anim != null and larry_body_anim.has_animation("run"):
+		larry_body_anim.play("run", 0.15)
+	larry_tween = create_tween()
+	larry_tween.tween_property(larry_body, "rotation:y", deg_to_rad(90.0) * dir, 0.25).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	larry_tween.tween_property(larry_body, "position", larry_body.position + Vector3(dir * 11.0, 0.0, -3.0), 1.5).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	larry_tween.tween_callback(func():
+		larry_body.visible = false
+		if larry_body_anim != null:
+			larry_body_anim.stop()
+		larry_state = 0)
+
+
 func _larry_duck(_seen: bool) -> void:
 	# Larry percebe que foi visto: vira o rosto, e sai correndo pela lateral (balançando enquanto corre)
 	larry_state = 2
@@ -2403,6 +2544,13 @@ func _larry_duck(_seen: bool) -> void:
 		larry_tween.kill()
 	var from: Vector3 = larry.position
 	var dir := 1.0 if from.x >= cam.global_position.x else -1.0
+	if larry_body != null and larry_body_anim != null:
+		_larry_body_run(from, dir)
+		for i in 9:
+			var ft2 := 0.3 + i * 0.15
+			var fp2: Vector3 = from + Vector3(dir * (ft2 - 0.3) * (ft2 - 0.3) * 5.0, -0.5, -0.6 * (ft2 - 0.3))
+			get_tree().create_timer(ft2).timeout.connect(sfx3.bind(_step_snd(), fp2, -3.0 - i * 1.2, 1.15))
+		return
 	larry_tween = create_tween()
 	larry_tween.tween_property(larry, "rotation:y", deg_to_rad(70.0) * dir, 0.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	larry_tween.tween_interval(0.06)
@@ -2647,13 +2795,26 @@ func _physics_process(delta: float) -> void:
 		var tp = null
 		if step < steps.size() and steps[step].has("tree") and not over:
 			tp = steps[step]["tree"]
-		if tp != null:
+		if tp != null and larry_body != null and larry_anims_ok and larry_state == 0:
+			_larry_body_prep()
+			larry2.visible = false
+			if not larry_tree_on:
+				larry_tree_on = true
+				larry_body_anim.play("idle", 0.3)
+			larry_body.visible = true
+			larry_body.position = Vector3(tp.x, -0.1 - larry_feet, tp.z)
+			larry_body.rotation.y = atan2(cam.global_position.x - tp.x, cam.global_position.z - tp.z) + sin(t * 0.5) * 0.04
+		elif tp != null:
 			larry2.visible = true
 			larry2.position = tp
 			var lp: Vector3 = tp
 			larry2.rotation.y = clampf(atan2(cam.global_position.x - lp.x, cam.global_position.z - lp.z), -1.1, 1.1) + sin(t * 0.5) * 0.05
 		else:
 			larry2.visible = false
+		if tp == null and larry_tree_on:
+			larry_tree_on = false
+			if larry_state == 0 and larry_body != null:
+				larry_body.visible = false
 
 	# interações
 	var h := ""
