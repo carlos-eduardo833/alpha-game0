@@ -240,3 +240,6 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 
 --- VERSAO 85 ---
 - Floresta trocada por "A forest 3 with a road at night for game" (textura melhor, estrada incluida). Agora e uma floresta unica e grande (antes eram 3 copias da antiga).
+
+--- VERSAO 86 ---
+- Larry levantando: ficava com as pernas/joelhos para dentro do salao (na frente da parede). Agora levanta a 0,6 m da parede e so depois se aproxima do vidro.

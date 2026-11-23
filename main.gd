@@ -2188,16 +2188,18 @@ func _larry_appear() -> void:
 		larry.visible = false
 		larry_state = 1
 		larry_tree_on = false
-		larry_born = t + 6.4
-		larry_until = t + 15.0
-		larry_body.position = Vector3(top.x, -0.1 - larry_feet, -9.7)
+		larry_born = t + 7.6
+		larry_until = t + 16.0
+		larry_body.position = Vector3(top.x, -0.1 - larry_feet, -9.3)
 		larry_body.rotation = Vector3(0, deg_to_rad(8.0), 0)
 		larry_body.visible = true
 		larry_body_anim.play("rise")
 		larry_body_anim.queue("idle")
 		larry_tween = create_tween()
-		larry_tween.tween_property(larry_body, "position:z", -8.72, 5.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-		larry_tween.parallel().tween_property(larry_body, "rotation:y", 0.0, 5.5)
+		# agachado/ajoelhado os joelhos vão 0,5 m pra frente: fica mais longe da parede até levantar, depois chega no vidro
+		larry_tween.tween_property(larry_body, "rotation:y", 0.0, 5.5)
+		larry_tween.tween_interval(0.2)
+		larry_tween.tween_property(larry_body, "position:z", -8.72, 1.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	else:
 		_larry_appear_head(top)
 	if larry_body != null and larry_anims_ok:
