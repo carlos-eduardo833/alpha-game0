@@ -227,3 +227,6 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 - Larry com animacoes Mixamo: levantar (Zombie Stand Up) na janela da bancada, ficar parado (Idle) e correr (Run).
 - Na ronda, o Larry fica parado (idle) entre as arvores da janela do deposito e corre quando voce aperta a trava.
 - Arquivos: assets/models/larry_run.fbx (com malha), larry_rise.fbx, larry_idle.fbx (sem malha).
+
+--- VERSAO 82 ---
+- Larry levanta mais perto da janela; o zoom/susto so acontece depois que ele terminou de levantar.
