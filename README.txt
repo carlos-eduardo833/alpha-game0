@@ -234,3 +234,6 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 --- VERSAO 83 ---
 - Larry fica colado na parede (z -8.72) em vez de dentro dela; ao correr, primeiro se afasta da parede e depois corre ao longo dela (nao atravessa mais).
 - Testado no Godot 4.7 headless: FBX importa, animacoes run/rise/idle carregam.
+
+--- VERSAO 84 ---
+- Larry levantando: tirado o "pulo pra frente" no fim (o quadril andava 1,6 m sozinho na animacao de levantar e voltava de uma vez no idle). Agora levanta no lugar e a emenda com o idle e suave.

@@ -2198,7 +2198,7 @@ func _larry_appear() -> void:
 		larry_tree_on = false
 		larry_born = t + 6.4
 		larry_until = t + 15.0
-		larry_body.position = Vector3(top.x, -0.1 - larry_feet, -8.95)
+		larry_body.position = Vector3(top.x, -0.1 - larry_feet, -9.7)
 		larry_body.rotation = Vector3(0, deg_to_rad(8.0), 0)
 		larry_body.visible = true
 		larry_body_anim.play("rise")
@@ -2499,10 +2499,14 @@ func _larry_load_anims() -> void:
 							var p0: Vector3 = an.track_get_key_value(ti, 0)
 							for ki in an.track_get_key_count(ti):
 								var pv: Vector3 = an.track_get_key_value(ti, ki)
-								an.track_set_key_value(ti, ki, Vector3(pv.x - p0.x, pv.y, pv.z - p0.z))
+								if pair[0] == "rise":
+									an.track_set_key_value(ti, ki, Vector3(0.0, pv.y, 0.0))   # levanta no lugar, sem "andar" pra trás
+								else:
+									an.track_set_key_value(ti, ki, Vector3(pv.x - p0.x, pv.y, pv.z - p0.z))
 				lib.add_animation(pair[0], an)
 				break
 		inst.free()
+	larry_body_anim.set_blend_time("rise", "idle", 0.8)   # emenda suave entre levantar e ficar parado
 	larry_anims_ok = lib.has_animation("run") and lib.has_animation("rise") and lib.has_animation("idle")
 
 
