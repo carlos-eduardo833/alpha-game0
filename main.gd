@@ -29,7 +29,7 @@ const CAR_TINT := Color.WHITE                  # cor extra do carro (Color.WHITE
 const TIRE_SPOTS := [Vector2(-1.45, -0.73), Vector2(-1.45, -4.27), Vector2(-4.55, -4.27), Vector2(-4.55, -0.73)]
 
 # ---- elevador animado
-const LIFT_SCALE_Y := 1.55                      # altura do elevador (maior = o carro sobe mais)
+const LIFT_SCALE_Y := 1.85                      # altura do elevador (maior = o carro sobe mais)
 const LIFT_SCALE := 1.3                        # tamanho do elevador em relação ao modelo original
 const LIFT_PAD_CENTER := Vector3(1.195, 0.02, -1.90)   # centro das plataformas no modelo original
 const LIFT_UP_START := 9.5                     # segundo da animação "up" em que o carro começa a subir
@@ -890,6 +890,23 @@ func _build_world() -> void:
 			jm.material_override = wall
 			jm.position = Vector3(sx, 1.3, sz)
 			add_child(jm)
+
+	# placas sobre as portas (lado da garagem)
+	for sg in [["RECEPÇÃO", 6.87, -90.0], ["DEPÓSITO", -6.87, 90.0]]:
+		var plate := Node3D.new()
+		plate.position = Vector3(sg[1], 3.25, 0.0)
+		plate.rotation_degrees.y = sg[2]
+		add_child(plate)
+		box(Vector3(0, 0, 0), Vector3(2.0, 0.46, 0.04), flat(Color(0.08, 0.1, 0.12), 0.7, 0.3), false, plate)
+		var tl := Label3D.new()
+		tl.text = sg[0]
+		tl.font_size = 96
+		tl.pixel_size = 0.0036
+		tl.modulate = Color(0.86, 0.84, 0.76)
+		tl.outline_size = 0
+		tl.shaded = true
+		tl.position = Vector3(0, 0, 0.026)
+		plate.add_child(tl)
 
 	# janelas
 	for w in [[-5.0, -8.35], [5.0, -8.35], [-10.0, -3.85], [10.0, -3.85]]:
@@ -2357,8 +2374,6 @@ func _radio_tick() -> void:
 func _larry_duck(seen: bool) -> void:
 	# Larry vira o rosto de leve (percebeu que foi visto), depois abaixa reto e se esconde atrás da parede
 	larry_state = 2
-	if seen:
-		sfx(snd_creak, -12.0, 1.3)
 	if larry_tween:
 		larry_tween.kill()
 	larry_tween = create_tween()

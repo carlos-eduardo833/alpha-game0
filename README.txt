@@ -214,3 +214,5 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 - Barulho do oleo removido (sem som ao completar o oleo). So toca se existir assets/audio/oleo_caindo.ogg.
 --- VERSAO 77 ---
 - Compressor ligado por mais tempo: o trecho dele funcionando foi repetido (emendas suaves), total 7,7 s, e a fala 'Normal' vem no fim.
+--- VERSAO 78 ---
+- Placas RECEPCAO e DEPOSITO sobre as portas (lado da garagem). Sem o barulho do Larry abaixando. Elevador mais alto (LIFT_SCALE_Y 1,85).
