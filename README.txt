@@ -230,3 +230,7 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 
 --- VERSAO 82 ---
 - Larry levanta mais perto da janela; o zoom/susto so acontece depois que ele terminou de levantar.
+
+--- VERSAO 83 ---
+- Larry fica colado na parede (z -8.72) em vez de dentro dela; ao correr, primeiro se afasta da parede e depois corre ao longo dela (nao atravessa mais).
+- Testado no Godot 4.7 headless: FBX importa, animacoes run/rise/idle carregam.

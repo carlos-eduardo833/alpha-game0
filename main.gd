@@ -2204,7 +2204,7 @@ func _larry_appear() -> void:
 		larry_body_anim.play("rise")
 		larry_body_anim.queue("idle")
 		larry_tween = create_tween()
-		larry_tween.tween_property(larry_body, "position:z", -8.58, 5.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		larry_tween.tween_property(larry_body, "position:z", -8.72, 5.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 		larry_tween.parallel().tween_property(larry_body, "rotation:y", 0.0, 5.5)
 	else:
 		_larry_appear_head(top)
@@ -2531,14 +2531,16 @@ func _larry_body_run(from: Vector3, dir: float) -> void:
 	larry.visible = false
 	larry_tree_on = false
 	larry_state = 2
-	larry_body.position = Vector3(from.x, -0.1 - larry_feet, from.z)
+	larry_body.position = Vector3(from.x, -0.1 - larry_feet, minf(from.z, -8.72))
 	larry_body.rotation = Vector3.ZERO
 	larry_body.visible = true
 	if larry_body_anim != null and larry_body_anim.has_animation("run"):
 		larry_body_anim.play("run", 0.15)
 	larry_tween = create_tween()
 	larry_tween.tween_property(larry_body, "rotation:y", deg_to_rad(90.0) * dir, 0.25).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	larry_tween.tween_property(larry_body, "position", larry_body.position + Vector3(dir * 11.0, 0.0, -3.0), 1.5).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	# primeiro se afasta da parede (para não atravessar), depois corre ao longo dela
+	larry_tween.parallel().tween_property(larry_body, "position:z", minf(larry_body.position.z, -8.6) - 1.5, 0.3).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	larry_tween.tween_property(larry_body, "position", Vector3(larry_body.position.x + dir * 12.0, larry_body.position.y, minf(larry_body.position.z, -8.6) - 3.5), 1.6).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	larry_tween.tween_callback(func():
 		larry_body.visible = false
 		if larry_body_anim != null:
