@@ -148,6 +148,8 @@ var larry: Node3D
 var tire_i := 0
 var crouch := 0.0
 var larry_tween: Tween
+var larry2: Node3D                 # Larry escondido no meio das árvores (rondas das janelas)
+var snd_knock: AudioStream         # batidas_vidro.ogg (opcional)
 var larry_state := 0           # 0 escondido, 1 espiando, 2 sumindo
 var larry_next := 25.0
 var larry_until := 0.0
@@ -1318,6 +1320,12 @@ func _build_world() -> void:
 		larry.scale = Vector3.ONE * 1.25
 		add_child(larry)
 		_set_layers(larry, 3)
+		larry2 = _baked("larry")
+		if larry2 != null:
+			larry2.visible = false
+			larry2.scale = Vector3.ONE * 1.25
+			add_child(larry2)
+			_set_layers(larry2, 3)
 	larry_next = LARRY_FIRST
 
 	# vulto translúcido
@@ -1982,6 +1990,7 @@ func _build_audio() -> void:
 	snd_hood_close = _opt_snd("capo_fechando")
 	snd_lock = _opt_snd("trava_janela")
 	snd_comp_off = _opt_snd("compressor_desliga")
+	snd_knock = _opt_snd("batidas_vidro")
 	snd_pour = _opt_snd("oleo_caindo")
 	snd_chime1 = _tone(1320.0, 1.4, 0.3)
 	snd_chime2 = _tone(990.0, 1.6, 0.3)
@@ -2024,10 +2033,10 @@ func _build_steps() -> void:
 		{"o": "Troque a bateria do carro (segure E)", "at": CAR_FRONT, "r": 1.9, "lift": true, "h": "Segure [E] para instalar a bateria", "hold": 4.0, "go": _s8},
 		{"o": "Pegue o calibrador de pneus no compressor de ar (fundo da garagem)", "at": Vector2(0.6, -7.2), "r": 1.9, "h": "[E] Pegar calibrador", "hold": 0.0, "go": _p3},
 		{"o": "Calibre os pneus: pneu 1 de 4 (agache ao lado da roda, segure E)", "at": TIRE_SPOTS[0], "r": 1.0, "lift": true, "multi": 4, "h": "Segure [E] para calibrar o pneu", "hold": 3.5, "go": _s9},
-		{"o": "Ronda do turno: verifique a janela dos fundos (lado direito)", "at": Vector2(5.0, -7.5), "r": 1.8, "h": "Segure [E] para checar a trava", "hold": 2.0, "go": _p4},
-		{"o": "Ronda do turno: verifique a janela dos fundos (lado esquerdo)", "at": Vector2(-5.0, -6.4), "r": 1.6, "h": "Segure [E] para checar a trava", "hold": 2.0, "go": _p5},
-		{"o": "Ronda do turno: verifique a janela do depósito", "at": Vector2(-10.0, -3.0), "r": 1.8, "h": "Segure [E] para checar a trava", "hold": 2.0, "go": _p6},
-		{"o": "Ronda do turno: verifique a janela da recepção", "at": Vector2(10.0, -3.0), "r": 1.8, "h": "Segure [E] para checar a trava", "hold": 2.0, "go": _p7},
+		{"o": "Ronda do turno: verifique a janela dos fundos (lado direito)", "at": Vector2(5.0, -7.5), "r": 1.8, "h": "Segure [E] para checar a trava", "hold": 2.0, "tree": Vector3(5.25, -0.4, -11.8), "go": _p4},
+		{"o": "Ronda do turno: verifique a janela dos fundos (lado esquerdo)", "at": Vector2(-5.0, -6.4), "r": 1.6, "h": "Segure [E] para checar a trava", "hold": 2.0, "tree": Vector3(-5.7, -0.4, -11.9), "go": _p5},
+		{"o": "Ronda do turno: verifique a janela do depósito", "at": Vector2(-10.0, -3.0), "r": 1.8, "h": "Segure [E] para checar a trava", "hold": 2.0, "tree": Vector3(-10.6, -0.4, -8.9), "go": _p6},
+		{"o": "Ronda do turno: verifique a janela da recepção", "at": Vector2(10.0, -3.0), "r": 1.8, "h": "Segure [E] para checar a trava", "hold": 2.0, "tree": Vector3(10.6, -0.4, -8.9), "go": _p7},
 		{"o": "Feche o capô", "at": CAR_FRONT, "r": 1.9, "lift": true, "h": "[E] Fechar capô", "hold": 0.0, "go": _s10},
 	]
 
@@ -2151,12 +2160,20 @@ func _larry_appear() -> void:
 		return
 	if larry_tween:
 		larry_tween.kill()
-	larry.position = LARRY_SPOTS[1]      # janela em cima da bancada
-	larry.rotation = Vector3.ZERO
+	# sobe devagar, com uma hesitação no meio, como se ele estivesse espiando pela janela
+	var top: Vector3 = LARRY_SPOTS[1]      # janela em cima da bancada
+	larry.position = top + Vector3(0, -1.5, 0)
+	larry.rotation = Vector3(0, deg_to_rad(16.0), deg_to_rad(-3.0))
 	larry.visible = true
 	larry_state = 1
-	larry_born = t
-	larry_until = t + 8.0
+	larry_born = t + 4.6                   # só pode "ser visto" depois que terminar de subir
+	larry_until = t + 13.0
+	larry_tween = create_tween()
+	larry_tween.tween_property(larry, "position", top + Vector3(0, -0.6, 0), 2.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	larry_tween.parallel().tween_property(larry, "rotation", Vector3(0, deg_to_rad(6.0), deg_to_rad(-1.0)), 2.2).set_trans(Tween.TRANS_SINE)
+	larry_tween.tween_interval(0.7)
+	larry_tween.tween_property(larry, "position", top, 1.7).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	larry_tween.parallel().tween_property(larry, "rotation", Vector3.ZERO, 1.7).set_trans(Tween.TRANS_SINE)
 	flick_until = t + 0.5
 	if snd_short != null:
 		sfx3(snd_short, Vector3(0.0, 3.0, 0.0), -3.0)
@@ -2215,10 +2232,18 @@ func _anomalies() -> void:
 				var pos := Vector3(side * (8.0 - i * 1.2), 1.0, -11.5)
 				tw.tween_callback(func(): sfx3(_step_snd(), pos, -2.0, 0.85))
 				tw.tween_interval(0.62)
-		2:   # batidas no portão
-			for i in 3:
-				get_tree().create_timer(0.5 * i).timeout.connect(sfx3.bind(snd_clack, Vector3(0, 2.0, 9.6), -2.0, 0.4))
-			say("...Alguém bateu no portão?", 3.0)
+		2:   # alguém bate no vidro de uma janela (a mais próxima do jogador)
+			var wins := [Vector3(5.0, 1.8, -8.4), Vector3(-5.0, 1.8, -8.4), Vector3(-10.0, 1.8, -3.9), Vector3(10.0, 1.8, -3.9)]
+			var wbest: Vector3 = wins[0]
+			for wp in wins:
+				if Vector3(wp.x, 0.0, wp.z).distance_to(Vector3(player.global_position.x, 0.0, player.global_position.z)) < Vector3(wbest.x, 0.0, wbest.z).distance_to(Vector3(player.global_position.x, 0.0, player.global_position.z)):
+					wbest = wp
+			if snd_knock != null:
+				sfx3(snd_knock, wbest, 2.0)
+			else:
+				for i in 3:
+					get_tree().create_timer(0.5 * i).timeout.connect(sfx3.bind(snd_clack, wbest, -2.0, 0.4))
+			say("...Alguém bateu no vidro?", 3.0)
 		4:   # a luz pisca e o rádio engasga
 			flick_until = t + 0.5
 			if snd_short != null:
@@ -2371,19 +2396,30 @@ func _radio_tick() -> void:
 
 
 
-func _larry_duck(seen: bool) -> void:
-	# Larry vira o rosto de leve (percebeu que foi visto), depois abaixa reto e se esconde atrás da parede
+func _larry_duck(_seen: bool) -> void:
+	# Larry percebe que foi visto: vira o rosto, e sai correndo pela lateral (balançando enquanto corre)
 	larry_state = 2
 	if larry_tween:
 		larry_tween.kill()
+	var from: Vector3 = larry.position
+	var dir := 1.0 if from.x >= cam.global_position.x else -1.0
 	larry_tween = create_tween()
-	var low: Vector3 = LARRY_SPOTS[1] + Vector3(0, -0.8, 0.0)
-	larry_tween.tween_property(larry, "rotation:y", deg_to_rad(28.0), 0.14).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	larry_tween.tween_interval(0.08)
-	larry_tween.tween_property(larry, "position", low, 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	larry_tween.tween_property(larry, "rotation:y", deg_to_rad(70.0) * dir, 0.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	larry_tween.tween_interval(0.06)
+	larry_tween.tween_method(_larry_run.bind(from, dir), 0.0, 1.0, 1.5).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	larry_tween.tween_callback(func():
 		larry.visible = false
 		larry_state = 0)
+	for i in 9:
+		var ft := 0.26 + i * 0.15
+		var fp: Vector3 = from + Vector3(dir * (ft - 0.26) * (ft - 0.26) * 5.0, -0.5, -0.6 * (ft - 0.26))
+		get_tree().create_timer(ft).timeout.connect(sfx3.bind(_step_snd(), fp, -3.0 - i * 1.2, 1.15))
+
+
+func _larry_run(u: float, from: Vector3, dir: float) -> void:
+	# corrida do Larry: desliza para o lado, balançando a cabeça a cada passada
+	larry.position = from + Vector3(dir * u * 11.0, absf(sin(u * TAU * 4.0)) * 0.16, -u * 3.0)
+	larry.rotation.z = sin(u * TAU * 4.0) * 0.09 * dir
 
 
 func _s5() -> void:
@@ -2605,6 +2641,19 @@ func _physics_process(delta: float) -> void:
 		var seen := cam.is_position_in_frustum(head) and to.length() < 22.0 and (-cam.global_transform.basis.z).dot(to.normalized()) > 0.9
 		if (seen and t > larry_born + 0.8) or t > larry_until:
 			_larry_duck(seen)
+
+	# Larry escondido no meio das árvores, de olho no jogador durante a ronda das janelas
+	if larry2 != null:
+		var tp = null
+		if step < steps.size() and steps[step].has("tree") and not over:
+			tp = steps[step]["tree"]
+		if tp != null:
+			larry2.visible = true
+			larry2.position = tp
+			var lp: Vector3 = tp
+			larry2.rotation.y = clampf(atan2(cam.global_position.x - lp.x, cam.global_position.z - lp.z), -1.1, 1.1) + sin(t * 0.5) * 0.05
+		else:
+			larry2.visible = false
 
 	# interações
 	var h := ""

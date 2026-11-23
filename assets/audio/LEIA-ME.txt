@@ -21,3 +21,4 @@ OUTROS SONS
 - capo_abrindo.ogg, capo_fechando.ogg, trava_janela.ogg, elevador_sobe.ogg, elevador_desce.ogg: sons do capo, da trava das janelas e do elevador.
 - compressor_desliga.ogg: compressor desligando, apos calibrar os pneus.
 - oleo_caindo.ogg (opcional): som do oleo sendo despejado, toca enquanto o jogador segura E (4 s).
+- batidas_vidro.ogg: sete batidas (anomalia sorteada: alguem bate no vidro).

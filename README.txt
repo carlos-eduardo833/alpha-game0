@@ -216,3 +216,5 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 - Compressor ligado por mais tempo: o trecho dele funcionando foi repetido (emendas suaves), total 7,7 s, e a fala 'Normal' vem no fim.
 --- VERSAO 78 ---
 - Placas RECEPCAO e DEPOSITO sobre as portas (lado da garagem). Sem o barulho do Larry abaixando. Elevador mais alto (LIFT_SCALE_Y 1,85).
+--- VERSAO 79 ---
+- Larry sobe devagar na janela (com hesitacao) e, ao ser visto, vira o rosto e sai correndo pela lateral, com passos. Na ronda das janelas ele fica escondido entre os pinheiros, meio atras de um tronco, olhando para o jogador. Anomalia 'batida no portao' virou 'batidas no vidro' da janela mais proxima, com batidas_vidro.ogg.
