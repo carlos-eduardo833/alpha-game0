@@ -243,3 +243,8 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 
 --- VERSAO 86 ---
 - Larry levantando: ficava com as pernas/joelhos para dentro do salao (na frente da parede). Agora levanta a 0,6 m da parede e so depois se aproxima do vidro.
+
+--- VERSAO 87 (PARTE 2) ---
+- Depois do capo fechado e do sino, o cliente estranho (o proprio Larry, de corpo inteiro) entra pela recepcao e desliza ate voce.
+- Dialogo com escolhas: teclas 1, 2, 3. Cerca de 12 falas, varios caminhos, 4 finais (help, stay, cold, scared) guardados em p2_end para a Parte 3.
+- Ele cita coisas do jogo (guincho no radio, janela do deposito, portao). Depois sai, a luz pisca e aparece "Fim da Parte 2".

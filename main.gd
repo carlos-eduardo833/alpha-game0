@@ -1,5 +1,5 @@
 extends Node3D
-## Turno da Madrugada: Km 42 - Parte 1 (Godot 4.7, renderizador Compatibilidade)
+## Turno da Madrugada: Km 42 - Partes 1 e 2 (Godot 4.7, renderizador Compatibilidade)
 ## Modelos 3D (assets/models) e texturas (assets/textures) vem dos arquivos enviados; sons e itens simples sao gerados por codigo.
 
 const SR := 22050
@@ -92,6 +92,7 @@ var new_bat: Node3D
 var clip: Node3D
 var pp_sheet_n: Node3D
 var clip_in_hand := false
+var look_lock := false
 var multi: Node3D
 var galao: Node3D
 var funil: Node3D
@@ -107,6 +108,7 @@ var steps := []
 var l_obj: Label
 var l_chk: RichTextLabel
 var l_sub: Label
+var ui_root: Control
 var l_hint: Label
 var bar: ProgressBar
 var overlay: Control
@@ -1409,6 +1411,7 @@ func _build_hud() -> void:
 	var root := Control.new()
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ui_root = root
 	cl.add_child(root)
 
 	for code in [BLUR, VIGNETTE, GRAIN]:
@@ -1568,7 +1571,7 @@ func _build_title(root: Control) -> void:
 	t2.add_theme_color_override("font_color", Color(0.62, 0.6, 0.55))
 	vb.add_child(t2)
 	var t3 := Label.new()
-	t3.text = "Parte 1: A rotina"
+	t3.text = "Partes 1 e 2: A rotina e o cliente"
 	t3.add_theme_font_size_override("font_size", 18)
 	t3.add_theme_color_override("font_color", Color(0.45, 0.44, 0.41))
 	vb.add_child(t3)
@@ -2667,7 +2670,7 @@ func _finish() -> void:
 		m.emission_energy_multiplier = 2.0
 	say("O serviço está pronto. Lá fora, a chuva não para.", 5.0)
 	get_tree().create_timer(4.5).timeout.connect(_chime)
-	get_tree().create_timer(9.5).timeout.connect(_end_screen)
+	get_tree().create_timer(7.5).timeout.connect(_part2_start)
 
 
 func _chime() -> void:
@@ -2682,7 +2685,215 @@ func _chime2() -> void:
 
 func _end_screen() -> void:
 	paused = true
-	_show_overlay("Fim da Parte 1", "Óleo, bateria, pneus e capô: o Cadillac está pronto.\n\nMas o sino da porta lateral acabou de tocar...\n\nNa Parte 2 chega o cliente estranho, com o diálogo de escolhas.", "Jogar de novo")
+	var res := {
+		"help": "Você ofereceu ajuda ao cliente. Ele disse que espera na porta: \"Quando o telefone tocar... atenda.\"",
+		"stay": "Você deixou o cliente esperando na recepção. Ele disse que é bom em esperar.",
+		"cold": "Você mandou o cliente embora. \"Eu sempre espero lá fora.\"",
+		"scared": "Você o expulsou aos gritos. Ele saiu devagar, sem pressa nenhuma.",
+	}
+	_show_overlay("Fim da Parte 2", str(res.get(p2_end, "")) + "\n\nNa Parte 3: o telefone toca, o chefe liga... e a luz acaba.", "Jogar de novo")
+
+
+# ---------------------------------------------------------------- Parte 2: o cliente estranho
+var dlg_on := false
+var dlg_ready := false
+var dlg_node := ""
+var dlg_opts_data: Array = []
+var dlg_bg: ColorRect
+var dlg_name: Label
+var dlg_text: Label
+var dlg_opts: Array = []
+var dlg_tween: Tween
+var p2_end := ""
+var cust_fin := Vector3.ZERO
+
+var DLG := {
+	"start": {"t": "Boa noite. A luz estava acesa... O senhor ainda está aberto?", "c": [
+		["Estamos fechando, mas pode entrar. Em que posso ajudar?", "n_help"],
+		["Já fechamos. Volte amanhã.", "n_closed"],
+		["Como você entrou? O portão está fechado.", "n_gate"]]},
+	"n_help": {"t": "Meu carro ficou na estrada. Eu espero há muito tempo. O senhor tem um guincho?", "c": [
+		["O guincho quebrou. Mas posso ligar para outro.", "n_guincho"],
+		["Qual é o seu nome?", "n_name"],
+		["Onde exatamente ficou o seu carro?", "n_where"]]},
+	"n_closed": {"t": "Eu entendo. Mas eu não tenho para onde ir. Lá fora... eles ficam olhando.", "c": [
+		["Quem fica olhando?", "n_who"],
+		["Sinto muito. Não posso ajudar.", "e_cold"],
+		["Tudo bem. Fique aqui até a chuva passar.", "e_stay"]]},
+	"n_gate": {"t": "O portão. Sim. Eu sempre acho um jeito. Não se preocupe com isso.", "c": [
+		["Isso não responde a minha pergunta.", "n_who"],
+		["Tá... Então no que posso ajudar?", "n_help"],
+		["Saia daqui agora!", "e_scared"]]},
+	"n_guincho": {"t": "Seu chefe disse a mesma coisa. Que o guincho quebrou na estrada. Ele fala bastante pelo rádio, não é?", "c": [
+		["Você ouviu o rádio? Daqui de dentro?", "n_radio"],
+		["Fique sentado. Eu resolvo isso.", "e_help"]]},
+	"n_name": {"t": "Larry. Eu acho que é Larry. Faz tempo que ninguém me chama.", "c": [
+		["Larry... você esteve nas janelas hoje à noite?", "n_windows"],
+		["Certo, Larry. Vamos ver o seu carro.", "e_help"],
+		["Prefiro que você espere lá fora, Larry.", "e_cold"]]},
+	"n_where": {"t": "No quilômetro quarenta e dois. Bem na frente do posto. O senhor passou por ele hoje, quando chegou.", "c": [
+		["Aqui é o Km 42. Eu não vi carro nenhum.", "n_who"],
+		["Vou dar uma olhada lá fora.", "e_help"]]},
+	"n_who": {"t": "Eles. Os que ficam entre as árvores. O senhor viu. Olhou pela janela do depósito e apertou a trava.", "c": [
+		["Era você? Nas janelas?", "n_windows"],
+		["Chega. Preciso que você saia.", "e_scared"],
+		["Fique aqui. Vou chamar o Marcos.", "e_stay"]]},
+	"n_windows": {"t": "Eu só queria ver se ainda tinha alguém aqui dentro. Ninguém olha para mim. Faz muito tempo.", "c": [
+		["Eu estou olhando agora. Pode ficar até amanhecer.", "e_stay"],
+		["Não quero você perto de mim.", "e_scared"]]},
+	"n_radio": {"t": "O rádio. O vidro. As luzes. Tudo fala comigo quando fica quieto.", "c": [
+		["Você está me assustando. Saia.", "e_scared"],
+		["Fique. Eu preciso entender isso.", "e_stay"]]},
+	"e_help": {"t": "Obrigado. Eu espero na porta. E quando o telefone tocar... atenda.", "end": "help"},
+	"e_stay": {"t": "Obrigado. Eu me sento aqui. Pode continuar o seu turno. Eu sou bom em esperar.", "end": "stay"},
+	"e_cold": {"t": "Entendo. Eu espero lá fora. Eu sempre espero lá fora.", "end": "cold"},
+	"e_scared": {"t": "Não precisa gritar. Eu já estou indo.", "end": "scared"},
+}
+
+
+func _build_dialog() -> void:
+	dlg_bg = ColorRect.new()
+	dlg_bg.color = Color(0, 0, 0, 0.62)
+	dlg_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	dlg_bg.anchor_left = 0.1
+	dlg_bg.anchor_right = 0.9
+	dlg_bg.anchor_top = 1.0
+	dlg_bg.anchor_bottom = 1.0
+	dlg_bg.offset_top = -235
+	dlg_bg.offset_bottom = -20
+	dlg_bg.visible = false
+	ui_root.add_child(dlg_bg)
+	var vb := VBoxContainer.new()
+	vb.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	vb.set_anchors_preset(Control.PRESET_FULL_RECT)
+	vb.offset_left = 22
+	vb.offset_right = -22
+	vb.offset_top = 14
+	vb.offset_bottom = -12
+	vb.add_theme_constant_override("separation", 6)
+	dlg_bg.add_child(vb)
+	dlg_name = _lbl(vb, 20, Color(0.85, 0.65, 0.23))
+	dlg_name.text = "O cliente"
+	dlg_text = _lbl(vb, 25, Color(0.95, 0.92, 0.86))
+	dlg_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	dlg_text.custom_minimum_size = Vector2(0, 60)
+	dlg_opts.clear()
+	for i in 3:
+		var o := _lbl(vb, 22, Color(0.72, 0.8, 0.9))
+		o.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		dlg_opts.append(o)
+
+
+func _part2_start() -> void:
+	if l_chk != null:
+		l_chk.visible = false
+	l_sub.modulate.a = 0.0
+	_build_dialog()
+	# o jogador vira devagar para a porta da recepção
+	look_lock = true
+	var from_y := player.rotation.y
+	var pp := player.global_position
+	var to_y := atan2(-(7.0 - pp.x), -(0.0 - pp.z))
+	var tw := create_tween()
+	tw.tween_method(func(k: float): player.rotation.y = lerp_angle(from_y, to_y, k), 0.0, 1.0, 2.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	tw.parallel().tween_method(func(k: float):
+		pitch = lerpf(pitch, 0.0, k)
+		cam.rotation.x = pitch, 0.0, 1.0, 2.0)
+	tw.tween_callback(func(): look_lock = false)
+	# posição final do cliente: a uns 2,4 m do jogador, no caminho da porta
+	var pv := Vector2(pp.x, pp.z)
+	var d := Vector2(7.0, 0.0) - pv
+	if d.length() < 0.01:
+		d = Vector2(1, 0)
+	var fv := pv + d.normalized() * 2.4
+	fv.x = minf(fv.x, 6.3)
+	cust_fin = Vector3(fv.x, 0.0, fv.y)
+	if larry_body != null and larry_anims_ok:
+		_larry_body_prep()
+		larry_body.scale = larry_body.scale * (1.95 / LARRY_ALTURA)
+		larry_body.visible = true
+		larry_body.position = Vector3(12.0, -0.05 - larry_feet, 0.0)
+		larry_body.rotation = Vector3(0, deg_to_rad(-90.0), 0)
+		larry_body_anim.play("idle")
+		get_tree().create_timer(3.0).timeout.connect(_cust_walk_in)
+	else:
+		get_tree().create_timer(3.0).timeout.connect(func(): _dlg_show("start"))
+	get_tree().create_timer(0.8).timeout.connect(func(): sfx3(snd_short if snd_short != null else snd_clack, Vector3(7.0, 2.0, 0.0), -4.0))
+
+
+func _cust_face(target: Vector3) -> void:
+	var dv := target - larry_body.position
+	larry_body.rotation.y = atan2(dv.x, dv.z)
+
+
+func _cust_walk_in() -> void:
+	var start := larry_body.position
+	var fin := Vector3(cust_fin.x, start.y, cust_fin.z)
+	_cust_face(fin)
+	for i in 7:
+		var ft := 0.5 + i * 0.85
+		get_tree().create_timer(ft).timeout.connect(func(): sfx3(_step_snd(), larry_body.global_position, -6.0, 0.8))
+	var tw := create_tween()
+	tw.tween_property(larry_body, "position", fin, 6.2).set_trans(Tween.TRANS_LINEAR)
+	tw.tween_callback(func():
+		larry_body.rotation.y = atan2(player.global_position.x - larry_body.position.x, player.global_position.z - larry_body.position.z)
+		_dlg_show("start"))
+
+
+func _dlg_show(id: String) -> void:
+	dlg_node = id
+	dlg_on = true
+	dlg_ready = false
+	var nd: Dictionary = DLG[id]
+	dlg_bg.visible = true
+	dlg_name.text = "O cliente"
+	dlg_text.text = nd["t"]
+	dlg_text.visible_characters = 0
+	for o in dlg_opts:
+		var ol: Label = o
+		ol.text = ""
+	if dlg_tween:
+		dlg_tween.kill()
+	dlg_tween = create_tween()
+	dlg_tween.tween_property(dlg_text, "visible_characters", dlg_text.text.length(), float(dlg_text.text.length()) / (TYPE_CPS * 1.1))
+	if nd.has("end"):
+		dlg_tween.tween_interval(3.0)
+		dlg_tween.tween_callback(func(): _dlg_finish(str(nd["end"])))
+	else:
+		dlg_tween.tween_interval(0.3)
+		dlg_tween.tween_callback(func():
+			var cs: Array = nd["c"]
+			dlg_opts_data = cs
+			for i in cs.size():
+				var ol: Label = dlg_opts[i]
+				ol.text = "[%d] %s" % [i + 1, cs[i][0]]
+			dlg_ready = true)
+
+
+func _dlg_pick(i: int) -> void:
+	if not dlg_ready or i >= dlg_opts_data.size():
+		return
+	dlg_ready = false
+	_dlg_show(str(dlg_opts_data[i][1]))
+
+
+func _dlg_finish(kind: String) -> void:
+	dlg_on = false
+	dlg_ready = false
+	p2_end = kind
+	dlg_bg.visible = false
+	if larry_body != null and larry_anims_ok:
+		var out := Vector3(12.0, larry_body.position.y, 0.0)
+		_cust_face(out)
+		for i in 7:
+			get_tree().create_timer(0.4 + i * 0.85).timeout.connect(func(): sfx3(_step_snd(), larry_body.global_position, -6.0, 0.8))
+		var tw := create_tween()
+		tw.tween_property(larry_body, "position", out, 6.2)
+		tw.tween_callback(func(): larry_body.visible = false)
+	get_tree().create_timer(4.5).timeout.connect(func():
+		flick_until = t + 1.2
+		sfx(snd_chime2, -6.0))
+	get_tree().create_timer(8.0).timeout.connect(_end_screen)
 
 
 # ---------------------------------------------------------------- entrada e loop
@@ -2690,12 +2901,14 @@ func _unhandled_input(ev: InputEvent) -> void:
 	if intro_on and ((ev is InputEventKey and ev.pressed) or (ev is InputEventMouseButton and ev.pressed)):
 		_end_intro()
 		return
-	if ev is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED and not paused and not clip_in_hand:
+	if ev is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED and not paused and not clip_in_hand and not look_lock:
 		player.rotation.y -= ev.relative.x * 0.0022
 		pitch = clampf(pitch - ev.relative.y * 0.0022, -1.4, 1.4)
 		cam.rotation.x = pitch
 	elif ev is InputEventKey and ev.pressed and not ev.echo:
-		if ev.physical_keycode == KEY_E:
+		if dlg_on and dlg_ready and ev.physical_keycode in [KEY_1, KEY_2, KEY_3]:
+			_dlg_pick(int(ev.physical_keycode) - int(KEY_1))
+		elif ev.physical_keycode == KEY_E:
 			press_e = true
 		elif ev.physical_keycode == KEY_F11:
 			var fs := DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
