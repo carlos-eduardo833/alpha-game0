@@ -248,3 +248,7 @@ Leia assets/LEIA-ME.txt: voce pode colocar carro, galao, funil, bateria, multime
 - Depois do capo fechado e do sino, o cliente estranho (o proprio Larry, de corpo inteiro) entra pela recepcao e desliza ate voce.
 - Dialogo com escolhas: teclas 1, 2, 3. Cerca de 12 falas, varios caminhos, 4 finais (help, stay, cold, scared) guardados em p2_end para a Parte 3.
 - Ele cita coisas do jogo (guincho no radio, janela do deposito, portao). Depois sai, a luz pisca e aparece "Fim da Parte 2".
+
+--- VERSAO 88 ---
+- Porta da rua na parede leste da recepcao (z 2,6). O cliente bate 3x e arromba; a porta abre com forca, bate e volta.
+- O cliente agora entra pela porta e anda pelos corredores (porta da recepcao -> vao do salao) em vez de atravessar a parede; ao sair faz o caminho de volta.

@@ -109,6 +109,9 @@ var l_obj: Label
 var l_chk: RichTextLabel
 var l_sub: Label
 var ui_root: Control
+var door_pivot: Node3D
+var door_block: MeshInstance3D
+var door_open := false
 var l_hint: Label
 var bar: ProgressBar
 var overlay: Control
@@ -886,7 +889,14 @@ func _build_world() -> void:
 	for cx in [-10.0, 10.0]:
 		_wall_h(cx - 3.0, cx + 3.0, -4.0, [cx], wall)
 		box(Vector3(cx, 2, 4), Vector3(6, 4, 0.2), wall)
-		box(Vector3(signf(cx) * 13.0, 2, 0), Vector3(0.2, 4, 8), wall)
+		if cx < 0.0:
+			box(Vector3(-13.0, 2, 0), Vector3(0.2, 4, 8), wall)
+		else:
+			# parede leste da recepção, com a porta da rua (z 2,1 a 3,1)
+			box(Vector3(13.0, 2, -0.95), Vector3(0.2, 4, 6.1), wall)
+			box(Vector3(13.0, 2, 3.55), Vector3(0.2, 4, 0.9), wall)
+			box(Vector3(13.0, 3.1, 2.6), Vector3(0.2, 1.9, 1.0), wall)
+			_build_recep_door()
 
 	# só os batentes das portas ficam arredondados
 	for sx in [-7.0, 7.0]:
@@ -2695,6 +2705,73 @@ func _end_screen() -> void:
 
 
 # ---------------------------------------------------------------- Parte 2: o cliente estranho
+func _build_recep_door() -> void:
+	var wood := flat(Color(0.26, 0.17, 0.1), 0.8)
+	var metal := flat(Color(0.5, 0.5, 0.52), 0.35, 0.6)
+	var darkm := flat(Color(0.08, 0.07, 0.07), 0.9)
+	# batente
+	box(Vector3(12.93, 2.1, 2.08), Vector3(0.16, 4.2, 0.08), darkm, false)
+	box(Vector3(12.93, 2.1, 3.12), Vector3(0.16, 4.2, 0.08), darkm, false)
+	box(Vector3(12.93, 2.14, 2.6), Vector3(0.16, 0.08, 1.0), darkm, false)
+	# folha da porta, presa na dobradiça (lado sul): gira para dentro da recepção
+	door_pivot = Node3D.new()
+	door_pivot.position = Vector3(12.98, 0.0, 3.08)
+	add_child(door_pivot)
+	box(Vector3(0, 1.05, -0.49), Vector3(0.05, 2.1, 0.98), wood, false, door_pivot)
+	box(Vector3(-0.04, 1.0, -0.85), Vector3(0.05, 0.05, 0.14), metal, false, door_pivot)
+	box(Vector3(-0.03, 1.15, -0.85), Vector3(0.04, 0.14, 0.08), darkm, false, door_pivot)
+	# bloqueio invisível enquanto a porta está fechada
+	door_block = box(Vector3(12.98, 1.05, 2.6), Vector3(0.2, 2.1, 1.0), flat(Color(0, 0, 0)), true)
+	door_block.visible = false
+	# chão lá fora, para o cliente não vir do vazio
+	box(Vector3(19.5, -0.2, 0.0), Vector3(13.0, 0.1, 30.0), flat(Color(0.05, 0.06, 0.04), 0.95), false)
+
+
+func _door_kick() -> void:
+	# a porta é arrombada: abre com força, bate e volta um pouco
+	if door_block != null:
+		door_block.queue_free()
+		door_block = null
+	door_open = true
+	if snd_hood_close != null:
+		sfx3(snd_hood_close, Vector3(13.0, 1.2, 2.6), 6.0, 0.55)
+	else:
+		sfx3(snd_clack, Vector3(13.0, 1.2, 2.6), 6.0, 0.4)
+	flick_until = t + 0.7
+	var tw := create_tween()
+	tw.tween_property(door_pivot, "rotation:y", deg_to_rad(112.0), 0.16).set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_OUT)
+	tw.tween_property(door_pivot, "rotation:y", deg_to_rad(96.0), 0.5).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
+
+
+func _cust_path(pts: Array, speed: float) -> void:
+	# anda por uma lista de pontos (x, z) com velocidade constante, olhando para onde vai
+	var tw := create_tween()
+	var cur := Vector2(larry_body.position.x, larry_body.position.z)
+	var total := 0.0
+	for p in pts:
+		var pv: Vector2 = p
+		var dur := cur.distance_to(pv) / speed
+		total += dur
+		var y := larry_body.position.y
+		tw.tween_callback(func(): _cust_face(Vector3(pv.x, y, pv.y)))
+		tw.tween_property(larry_body, "position", Vector3(pv.x, y, pv.y), dur)
+		cur = pv
+	for i in int(total / 0.85):
+		get_tree().create_timer(0.4 + i * 0.85).timeout.connect(func(): sfx3(_step_snd(), larry_body.global_position, -6.0, 0.8))
+	tw.tween_callback(_cust_arrived)
+
+
+func _cust_arrived() -> void:
+	if dlg_on or p2_end != "":
+		_cust_gone()
+		return
+	larry_body.rotation.y = atan2(player.global_position.x - larry_body.position.x, player.global_position.z - larry_body.position.z)
+	_dlg_show("start")
+
+
+func _cust_gone() -> void:
+	larry_body.visible = false
+
 var dlg_on := false
 var dlg_ready := false
 var dlg_node := ""
@@ -2793,7 +2870,7 @@ func _part2_start() -> void:
 	look_lock = true
 	var from_y := player.rotation.y
 	var pp := player.global_position
-	var to_y := atan2(-(7.0 - pp.x), -(0.0 - pp.z))
+	var to_y := atan2(-(13.0 - pp.x), -(2.6 - pp.z))
 	var tw := create_tween()
 	tw.tween_method(func(k: float): player.rotation.y = lerp_angle(from_y, to_y, k), 0.0, 1.0, 2.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	tw.parallel().tween_method(func(k: float):
@@ -2812,13 +2889,17 @@ func _part2_start() -> void:
 		_larry_body_prep()
 		larry_body.scale = larry_body.scale * (1.95 / LARRY_ALTURA)
 		larry_body.visible = true
-		larry_body.position = Vector3(12.0, -0.05 - larry_feet, 0.0)
+		larry_body.position = Vector3(15.6, -0.05 - larry_feet, 2.6)
 		larry_body.rotation = Vector3(0, deg_to_rad(-90.0), 0)
 		larry_body_anim.play("idle")
-		get_tree().create_timer(3.0).timeout.connect(_cust_walk_in)
+		get_tree().create_timer(4.2).timeout.connect(_door_kick)
+		get_tree().create_timer(4.6).timeout.connect(_cust_walk_in)
 	else:
-		get_tree().create_timer(3.0).timeout.connect(func(): _dlg_show("start"))
-	get_tree().create_timer(0.8).timeout.connect(func(): sfx3(snd_short if snd_short != null else snd_clack, Vector3(7.0, 2.0, 0.0), -4.0))
+		get_tree().create_timer(4.2).timeout.connect(_door_kick)
+		get_tree().create_timer(6.0).timeout.connect(func(): _dlg_show("start"))
+	# batidas na porta antes de arrombar
+	if snd_knock != null:
+		get_tree().create_timer(1.0).timeout.connect(func(): sfx3(snd_knock, Vector3(13.0, 1.4, 2.6), 3.0, 0.8))
 
 
 func _cust_face(target: Vector3) -> void:
@@ -2827,17 +2908,13 @@ func _cust_face(target: Vector3) -> void:
 
 
 func _cust_walk_in() -> void:
-	var start := larry_body.position
-	var fin := Vector3(cust_fin.x, start.y, cust_fin.z)
-	_cust_face(fin)
-	for i in 7:
-		var ft := 0.5 + i * 0.85
-		get_tree().create_timer(ft).timeout.connect(func(): sfx3(_step_snd(), larry_body.global_position, -6.0, 0.8))
-	var tw := create_tween()
-	tw.tween_property(larry_body, "position", fin, 6.2).set_trans(Tween.TRANS_LINEAR)
-	tw.tween_callback(func():
-		larry_body.rotation.y = atan2(player.global_position.x - larry_body.position.x, player.global_position.z - larry_body.position.z)
-		_dlg_show("start"))
+	var fin := Vector2(cust_fin.x, cust_fin.z)
+	var pts: Array = [Vector2(12.2, 2.6)]
+	if fin.x < 7.0:
+		pts.append(Vector2(7.7, 0.2))
+		pts.append(Vector2(6.3, 0.2))
+	pts.append(fin)
+	_cust_path(pts, 1.5)
 
 
 func _dlg_show(id: String) -> void:
@@ -2883,17 +2960,17 @@ func _dlg_finish(kind: String) -> void:
 	p2_end = kind
 	dlg_bg.visible = false
 	if larry_body != null and larry_anims_ok:
-		var out := Vector3(12.0, larry_body.position.y, 0.0)
-		_cust_face(out)
-		for i in 7:
-			get_tree().create_timer(0.4 + i * 0.85).timeout.connect(func(): sfx3(_step_snd(), larry_body.global_position, -6.0, 0.8))
-		var tw := create_tween()
-		tw.tween_property(larry_body, "position", out, 6.2)
-		tw.tween_callback(func(): larry_body.visible = false)
-	get_tree().create_timer(4.5).timeout.connect(func():
+		var pts2: Array = []
+		if larry_body.position.x < 7.0:
+			pts2.append(Vector2(6.3, 0.2))
+			pts2.append(Vector2(7.7, 0.2))
+		pts2.append(Vector2(12.2, 2.6))
+		pts2.append(Vector2(15.6, 2.6))
+		_cust_path(pts2, 1.5)
+	get_tree().create_timer(7.0).timeout.connect(func():
 		flick_until = t + 1.2
 		sfx(snd_chime2, -6.0))
-	get_tree().create_timer(8.0).timeout.connect(_end_screen)
+	get_tree().create_timer(10.5).timeout.connect(_end_screen)
 
 
 # ---------------------------------------------------------------- entrada e loop
